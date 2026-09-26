@@ -1,0 +1,7 @@
+# Compiled class files
+bin/
+*.class
+
+# OS generated files
+.DS_Store
+Thumbs.db
