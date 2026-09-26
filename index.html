@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex National Bank — ATM Transaction Simulation System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070d19;
+      --bg-kiosk: #0b1329;
+      --bg-screen: #0a0f1d;
+      --bg-card: #131c35;
+      --border-card: #202e52;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --accent-cyan: #38bdf8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --text-white: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Top Global Header */
+    header {
+      background: rgba(11, 19, 41, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-card);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #38bdf8, #2563eb);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 20px;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text-white);
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 10px var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      background: rgba(19, 28, 53, 0.6);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border-card);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-main);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-white);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .action-badge {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-pdf {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      transition: transform 0.15s ease;
+    }
+
+    .btn-pdf:hover {
+      transform: translateY(-1px);
+    }
+
+    /* Tab Content Layout */
+    main {
+      flex: 1;
+      padding: 30px;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .tab-view {
+      display: none;
+    }
+
+    .tab-view.active {
+      display: block;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ========================================================
+       SIMULATOR VIEW
+       ======================================================== */
+    .simulator-container {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 28px;
+      align-items: start;
+    }
+
+    /* Kiosk Hardware Frame */
+    .kiosk-chassis {
+      background: #0d1527;
+      border: 6px solid #131c33;
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .kiosk-marquee {
+      background: #111a33;
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .marquee-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 0.5px;
+    }
+
+    .marquee-status {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    /* Screen Monitor Bezel */
+    .screen-bezel {
+      background: #050a14;
+      border: 3px solid #1e3a8a;
+      border-radius: 16px;
+      padding: 8px;
+      box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.8);
+    }
+
+    .atm-screen {
+      background: var(--bg-screen);
+      min-height: 480px;
+      border-radius: 10px;
+      padding: 24px 32px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .screen-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .screen-breadcrumb {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .screen-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-bottom: 4px;
+    }
+
+    .screen-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Screen Content States */
+    .screen-state {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+    }
+
+    .screen-state.active {
+      display: flex;
+    }
+
+    /* State 1: Welcome */
+    .card-preview-box {
+      width: 320px;
+      height: 180px;
+      background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+      border-radius: 16px;
+      padding: 18px 22px;
+      margin: 10px auto 24px auto;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-chip {
+      width: 42px;
+      height: 32px;
+      background: linear-gradient(135deg, #eab308, #ca8a04);
+      border-radius: 6px;
+      border: 1px solid #fef08a;
+    }
+
+    .card-chip-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-network {
+      font-weight: 800;
+      font-style: italic;
+      font-size: 17px;
+      color: #fff;
+    }
+
+    .card-num-display {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      letter-spacing: 2px;
+      color: #f8fafc;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-holder-display {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .demo-card-selector {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .demo-chip-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      color: var(--text-white);
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .demo-chip-btn:hover, .demo-chip-btn.selected {
+      border-color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-cyan);
+    }
+
+    /* State 2: PIN Entry */
+    .pin-display-wrapper {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin: 30px 0;
+    }
+
+    .pin-dot-box {
+      width: 52px;
+      height: 60px;
+      background: #0d1527;
+      border: 2px solid var(--border-card);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: var(--accent-cyan);
+      transition: all 0.2s;
+    }
+
+    .pin-dot-box.filled {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.3);
+    }
+
+    /* State 3: Dashboard */
+    .dashboard-overview-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .user-greeting {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+
+    .user-account-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .balance-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      text-align: right;
+    }
+
+    .balance-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--success);
+      font-family: var(--font-mono);
+      text-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .action-btn {
+      background: #111a33;
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-white);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+      background: #162244;
+      border-color: var(--accent-cyan);
+      transform: translateY(-1px);
+    }
+
+    .action-title {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .action-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .action-chevron {
+      color: var(--text-dim);
+      font-size: 18px;
+    }
+
+    /* Generic Step Layout */
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 520px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .screen-controls {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: auto;
+      padding-top: 20px;
+    }
+
+    .kiosk-btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      color: var(--text-white);
+    }
+
+    .btn-secondary:hover {
+      background: #334155;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #064e3b;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-success:hover {
+      background: #059669;
+      color: #fff;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-warning {
+      background: var(--warning);
+      color: #78350f;
+    }
+
+    /* Hardware Console (Bottom Panel) */
+    .hardware-console {
+      margin-top: 18px;
+      background: #111a33;
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: 1fr 200px;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .peripheral-strip {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .periph-row {
+      background: #090f1f;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+    }
+
+    .periph-active {
+      color: var(--success);
+    }
+
+    /* Keypad Simulation */
+    .keypad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .key-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      height: 38px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .key-btn:active {
+      background: var(--primary);
+    }
+
+    .key-btn.action-cancel { background: #b91c1c; border-color: #ef4444; }
+    .key-btn.action-clear { background: #d97706; border-color: #f59e0b; color: #fff; }
+    .key-btn.action-enter { background: #059669; border-color: #10b981; color: #fff; }
+
+    /* Simulator Sidebar Info */
+    .sidebar-panel {
+      background: var(--bg-kiosk);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 24px;
+    }
+
+    .side-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text-white);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .meta-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 8px;
+    }
+
+    .meta-label { color: var(--text-muted); }
+    .meta-val { font-family: var(--font-mono); font-weight: 600; color: var(--text-white); }
+
+    /* Thermal Receipt Modal Simulation */
+    .thermal-slip {
+      background: #fdfdf9;
+      color: #0f172a;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      border-radius: 6px;
+      padding: 20px 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      max-width: 320px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .thermal-slip::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: repeating-linear-gradient(45deg, transparent, transparent 4px, #e2e8f0 4px, #e2e8f0 8px);
+    }
+
+    .receipt-center { text-align: center; }
+    .receipt-row { display: flex; justify-content: space-between; margin: 4px 0; }
+    .receipt-divider { border-bottom: 1px dashed #cbd5e1; margin: 8px 0; }
+    .barcode-emulation {
+      height: 24px;
+      background: repeating-linear-gradient(90deg, #0f172a 0px, #0f172a 2px, transparent 2px, transparent 4px, #0f172a 4px, #0f172a 7px);
+      margin: 12px 20px 4px 20px;
+    }
+
+    /* ========================================================
+       GALLERY VIEW
+       ======================================================== */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 24px;
+    }
+
+    .gallery-card {
+      background: var(--bg-kiosk);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .gallery-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5);
+      border-color: var(--primary);
+    }
+
+    .gallery-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-bottom: 1px solid var(--border-card);
+      background: #030712;
+    }
+
+    .gallery-info {
+      padding: 18px;
+    }
+
+    .gallery-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .gallery-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-white);
+    }
+
+    .gallery-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ========================================================
+       DATABASE VIEW
+       ======================================================== */
+    .db-section {
+      background: var(--bg-kiosk);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .db-table-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .db-table-responsive {
+      overflow-x: auto;
+    }
+
+    table.db-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    table.db-table th {
+      background: #111a33;
+      color: var(--text-white);
+      padding: 10px 14px;
+      font-weight: 600;
+      border: 1px solid var(--border-card);
+    }
+
+    table.db-table td {
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-family: var(--font-mono);
+      color: #cbd5e1;
+    }
+
+    table.db-table tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* PDF Viewer View */
+    .pdf-embed-wrapper {
+      background: var(--bg-kiosk);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 24px;
+      height: 800px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pdf-embed-frame {
+      flex: 1;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Global Top Header -->
+  <header>
+    <div class="brand-group">
+      <div class="brand-logo">A</div>
+      <div>
+        <div class="brand-title">Apex National Bank</div>
+        <div class="brand-sub">
+          <span class="live-dot"></span>
+          <span>ATM KIOSK #01 &bull; PORTAL ACTIVE</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('simulator')">Interactive Simulator</button>
+      <button class="tab-btn" onclick="switchTab('gallery')">Screen Gallery (11)</button>
+      <button class="tab-btn" onclick="switchTab('database')">Database &amp; Ledger</button>
+      <button class="tab-btn" onclick="switchTab('pdf')">Executive PDF Report</button>
+    </div>
+
+    <div class="header-actions">
+      <div class="action-badge">
+        <span>Desktop GUI: Active</span>
+      </div>
+      <a href="ATM_Transaction_Simulation_System_Report.pdf" class="btn-pdf" target="_blank" download>
+        <span>Download Report PDF</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main View Area -->
+  <main>
+
+    <!-- ==========================================
+         TAB 1: INTERACTIVE ATM SIMULATOR
+         ========================================== -->
+    <div id="tab-simulator" class="tab-view active">
+      <div class="simulator-container">
+        
+        <!-- Center Kiosk Assembly -->
+        <div class="kiosk-chassis">
+          
+          <!-- Top Marquee -->
+          <div class="kiosk-marquee">
+            <div class="marquee-title">APEX NATIONAL BANK &bull; TOUCHSCREEN KIOSK</div>
+            <div class="marquee-status" id="clock-display">2026-09-26 15:20:00 &bull; ONLINE</div>
+          </div>
+
+          <!-- Screen Bezel -->
+          <div class="screen-bezel">
+            <div class="atm-screen" id="atmScreen">
+
+              <!-- STATE 1: WELCOME SCREEN -->
+              <div id="screen-welcome" class="screen-state active">
+                <div class="screen-header">
+                  <div class="screen-breadcrumb">Security Verified &bull; Terminal Ready</div>
+                  <div class="screen-title">Welcome to Apex National Bank</div>
+                  <div class="screen-subtitle">Please insert your smart debit card or select a test account profile below</div>
+                </div>
+
+                <!-- Interactive Debit Card Visual -->
+                <div class="card-preview-box" id="virtualCard">
+                  <div class="card-chip-row">
+                    <div class="card-chip"></div>
+                    <div class="card-network">VISA</div>
+                  </div>
+                  <div class="card-num-display" id="cardNumPreview">4532 &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 4455</div>
+                  <div class="card-chip-row">
+                    <div class="card-holder-display" id="cardHolderPreview">Alexander Vance</div>
+                    <div style="font-size: 11px; color: #94a3b8; font-family: var(--font-mono);">EXP 12/28</div>
+                  </div>
+                </div>
+
+                <!-- Demo Card Switcher -->
+                <div style="text-align: center; margin-bottom: 8px; font-size: 12px; color: var(--text-muted);">Quick-Select Demo Customer Profile:</div>
+                <div class="demo-card-selector">
+                  <button class="demo-chip-btn selected" onclick="selectDemoAccount('Alexander Vance', '4532110022334455', '1234', 5420.50)">Alexander Vance ($5,420)</button>
+                  <button class="demo-chip-btn" onclick="selectDemoAccount('Sarah Connor', '5120334455667788', '4321', 12850.00)">Sarah Connor ($12,850)</button>
+                  <button class="demo-chip-btn" onclick="selectDemoAccount('Bruce Wayne', '6011998877665544', '9999', 95000.00)">Bruce Wayne ($95,000)</button>
+                </div>
+
+                <div class="screen-controls">
+                  <button class="kiosk-btn btn-primary" onclick="proceedToPin()">
+                    <span>Insert Card &amp; Enter PIN</span> &rarr;
+                  </button>
+                </div>
+              </div>
+
+              <!-- STATE 2: PIN ENTRY SCREEN -->
+              <div id="screen-pin" class="screen-state">
+                <div class="screen-header">
+                  <div class="screen-breadcrumb">Step 2 of 2 &bull; Identity Authentication</div>
+                  <div class="screen-title">Enter 4-Digit Confidential PIN</div>
+                  <div class="screen-subtitle">Use the physical numeric pinpad below or keypad numbers to authenticate</div>
+                </div>
+
+                <div class="step-card" style="text-align: center;">
+                  <div style="font-size: 14px; font-weight: 600; color: var(--accent-cyan); margin-bottom: 4px;" id="pinAuthCardholder">Alexander Vance</div>
+                  <div style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);" id="pinAuthCardMasked">Card: 4532 &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 4455</div>
+
+                  <div class="pin-display-wrapper">
+                    <div class="pin-dot-box" id="pinBox0"></div>
+                    <div class="pin-dot-box" id="pinBox1"></div>
+                    <div class="pin-dot-box" id="pinBox2"></div>
+                    <div class="pin-dot-box" id="pinBox3"></div>
+                  </div>
+
+                  <div style="font-size: 12px; color: var(--warning);" id="pinHintText">Demo PIN for this card is: <strong id="demoPinDisplay">1234</strong></div>
+                </div>
+
+                <div class="screen-controls">
+                  <button class="kiosk-btn btn-secondary" onclick="ejectCard()">Cancel / Eject Card</button>
+                  <button class="kiosk-btn btn-success" onclick="verifyPin()">Authenticate PIN &rarr;</button>
+                </div>
+              </div>
+
+              <!-- STATE 3: MAIN DASHBOARD -->
+              <div id="screen-dashboard" class="screen-state">
+                <div class="screen-header">
+                  <div class="screen-breadcrumb">Apex National Bank &bull; ATM Dashboard</div>
+                  <div class="screen-title">Select a Transaction</div>
+                  <div class="screen-subtitle">Choose an operation below or press the corresponding number key (1-8)</div>
+                </div>
+
+                <div class="dashboard-overview-card">
+                  <div>
+                    <div class="user-greeting" id="dashUserGreeting">Welcome, Alexander Vance</div>
+                    <div class="user-account-sub" id="dashAccountInfo">Account: ACC-1001-8842 &bull; Type: SAVINGS &bull; Card: **** 4455</div>
+                  </div>
+                  <div>
+                    <div class="balance-label">AVAILABLE BALANCE</div>
+                    <div class="balance-val" id="dashBalanceVal">$5,420.50</div>
+                  </div>
+                </div>
+
+                <div class="action-grid">
+                  <div class="action-btn" onclick="showScreen('withdraw')">
+                    <div>
+                      <div class="action-title">1. Cash Withdrawal</div>
+                      <div class="action-desc">Custom amount with exact banknote breakdown</div>
+                    </div>
+                    <div class="action-chevron">&rsaquo;</div>
+                  </div>
+
+                  <div class="action-btn" onclick="showScreen('fastcash')">
+                    <div>
+                      <div class="action-title">2. Fast Cash Dispense</div>
+                      <div class="action-desc">Instant 1-touch preset cash ($20 - $500)</div>
+                    </div>
+                    <div class="action-chevron">&rsaquo;</div>
+                  </div>
+
+                  <div class="action-btn" onclick="showScreen('deposit')">
+                    <div>
+                      <div class="action-title">3. Banknote Deposit</div>
+                      <div class="action-desc">Accept banknote deposits into secure hopper</div>
+                    </div>
+                    <div class="action-chevron">&rsaquo;</div>
+                  </div>
+
+                  <div class="action-btn" onclick="showScreen('transfer')">
+                    <div>
+                      <div class="action-title">4. Fund Transfer</div>
+                      <div class="action-desc">Electronic transfer to another account</div>
+                    </div>
+                    <div class="action-chevron">&rsaquo;</div>
+                  </div>
+
+                  <div class="action-btn" onclick="showScreen('balance')">
+                    <div>
+                      <div class="action-title">5. Balance Inquiry</div>
+                      <div class="action-desc">View official standing and daily limits</div>
+                    </div>
+                    <div class="action-chevron">&rsaquo;</div>
+                  </div>
+
+                  <div class="action-btn" onclick="showScreen('statement')">
+                    <div>
+                      <div class="action-title">6. Mini Statement</div>
+                      <div class="action-desc">Transaction audit ledger &amp; thermal receipt</div>
+                    </div>
+                    <div class="action-chevron">&rsaquo;</div>
+                  </div>
+
+                  <div class="action-btn" onclick="showScreen('pinchange')">
+                    <div>
+                      <div class="action-title">7. Change Secret PIN</div>
+                      <div class="action-desc">Update 4-digit authentication code</div>
+                    </div>
+                    <div class="action-chevron">&rsaquo;</div>
+                  </div>
+
+                  <div class="action-btn" onclick="ejectCard()" style="border-color: rgba(239, 68, 68, 0.4);">
+                    <div>
+                      <div class="action-title" style="color: var(--danger);">8. Eject Card / Exit</div>
+                      <div class="action-desc">Safely terminate active ATM banking session</div>
+                    </div>
+                    <div class="action-chevron" style="color: var(--danger);">&times;</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- STATE 4: WITHDRAW SCREEN -->
+              <div id="screen-withdraw" class="screen-state">
+                <div class="screen-header">
+                  <div class="screen-breadcrumb">Cash Withdrawal &bull; Multi-Step Flow</div>
+                  <div class="screen-title">Specify Withdrawal Amount</div>
+                  <div class="screen-subtitle">Dispenses $100, $50, $20, $10 notes (Multiples of $10)</div>
+                </div>
+
+                <div class="step-card">
+                  <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+                    <span>Available Balance: <strong style="color: var(--success);" id="withAvailBal">$5,420.50</strong></span>
+                    <span>Daily Limit: <strong>$2,000.00</strong></span>
+                  </div>
+
+                  <div style="background: #090f1f; border: 2px solid var(--accent-cyan); border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 16px;">
+                    <div style="font-size: 38px; font-weight: 800; color: var(--accent-cyan); font-family: var(--font-mono);" id="withAmountDisplay">$100</div>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px;">
+                    <button class="kiosk-btn btn-secondary" style="padding: 8px;" onclick="addWithdrawAmount(20)">+$20</button>
+                    <button class="kiosk-btn btn-secondary" style="padding: 8px;" onclick="addWithdrawAmount(50)">+$50</button>
+                    <button class="kiosk-btn btn-secondary" style="padding: 8px;" onclick="addWithdrawAmount(100)">+$100</button>
+                    <button class="kiosk-btn btn-secondary" style="padding: 8px;" onclick="addWithdrawAmount(200)">+$200</button>
+                  </div>
+
+                  <!-- Calculated Banknote Breakdown -->
+                  <div style="background: #111a33; border-radius: 8px; padding: 10px 14px; font-size: 12px; display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Calculated Dispense Breakdown:</span>
+                    <span style="font-weight: 700; color: var(--text-white);" id="withNoteBreakdown">1 &times; $100 bill</span>
+                  </div>
+                </div>
+
+                <div class="screen-controls">
+                  <button class="kiosk-btn btn-secondary" onclick="showScreen('dashboard')">Back to Menu</button>
+                  <button class="kiosk-btn btn-warning" onclick="resetWithdrawAmount()">Clear Amount</button>
+                  <button class="kiosk-btn btn-success" onclick="confirmWithdrawal()">Confirm Withdrawal &rarr;</button>
+                </div>
+              </div>
+
+              <!-- STATE 5: FAST CASH SCREEN -->
+              <div id="screen-fastcash" class="screen-state">
+                <div class="screen-header">
+                  <div class="screen-breadcrumb">Fast Cash &bull; Express 1-Touch Dispense</div>
+                  <div class="screen-title">Select Fast Cash Preset</div>
+                  <div class="screen-subtitle">Instant cash dispense with pre-configured note combinations</div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 600px; margin: 0 auto; width: 100%;">
+                  <button class="action-btn" onclick="executeFastCash(20)">
+                    <div><div class="action-title" style="font-size: 18px;">$20</div><div class="action-desc">1 &times; $20 note</div></div>
+                    <div class="action-chevron">&rsaquo;</div>
+                  </button>
+                  <button class="action-btn" onclick="executeFastCash(40)">
+                    <div><div class="action-title" style="font-size: 18px;">$40</div><div class="action-desc">2 &times; $20 notes</div></div>
+                    <div class="action-chevron">&rsaquo;</div>
+                  </button>
+                  <button class="action-btn" onclick="executeFastCash(60)">
+                    <div><div class="action-title" style="font-size: 18px;">$60</div><div class="action-desc">1 &times; $50 + 1 &times; $10 notes</div></div>
+                    <div class="action-chevron">&rsaquo;</div>
+                  </button>
+                  <button class="action-btn" onclick="executeFastCash(100)">
+                    <div><div class="action-title" style="font-size: 18px;">$100</div><div class="action-desc">1 &times; $100 note</div></div>
+                    <div class="action-chevron">&rsaquo;</div>
+                  </button>
+                  <button class="action-btn" onclick="executeFastCash(200)">
+                    <div><div class="action-title" style="font-size: 18px;">$200</div><div class="action-desc">2 &times; $100 notes</div></div>
+                    <div class="action-chevron">&rsaquo;</div>
+                  </button>
+                  <button class="action-btn" onclick="executeFastCash(500)">
+                    <div><div class="action-title" style="font-size: 18px;">$500</div><div class="action-desc">5 &times; $100 notes</div></div>
+                    <div class="action-chevron">&rsaquo;</div>
+                  </button>
+                </div>
+
+                <div class="screen-controls">
+                  <button class="kiosk-btn btn-secondary" onclick="showScreen('dashboard')">Back to Menu</button>
+                </div>
+              </div>
+
+              <!-- STATE 6: DEPOSIT SCREEN -->
+              <div id="screen-deposit" class="screen-state">
+                <div class="screen-header">
+                  <div class="screen-breadcrumb">Cash Deposit Hopper &bull; Auto-Totaling</div>
+                  <div class="screen-title">Insert Banknotes into Hopper</div>
+                  <div class="screen-subtitle">Place notes flat into the slot. Accepted: $100, $50, $20, $10 bills</div>
+                </div>
+
+                <div class="step-card">
+                  <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span>$100 Banknote:</span>
+                      <input type="number" min="0" value="0" id="dep100" onchange="calculateDepositTotal()" style="width: 70px; padding: 6px; background: #090f1f; border: 1px solid var(--border-card); color: #fff; text-align: center; border-radius: 6px;">
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span>$50 Banknote:</span>
+                      <input type="number" min="0" value="0" id="dep50" onchange="calculateDepositTotal()" style="width: 70px; padding: 6px; background: #090f1f; border: 1px solid var(--border-card); color: #fff; text-align: center; border-radius: 6px;">
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span>$20 Banknote:</span>
+                      <input type="number" min="0" value="0" id="dep20" onchange="calculateDepositTotal()" style="width: 70px; padding: 6px; background: #090f1f; border: 1px solid var(--border-card); color: #fff; text-align: center; border-radius: 6px;">
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span>$10 Banknote:</span>
+                      <input type="number" min="0" value="0" id="dep10" onchange="calculateDepositTotal()" style="width: 70px; padding: 6px; background: #090f1f; border: 1px solid var(--border-card); color: #fff; text-align: center; border-radius: 6px;">
+                    </div>
+                  </div>
+
+                  <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-card); display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700;">Total Hopper Value:</span>
+                    <span style="font-size: 24px; font-weight: 800; color: var(--success); font-family: var(--font-mono);" id="depTotalDisplay">$0.00</span>
+                  </div>
+                </div>
+
+                <div class="screen-controls">
+                  <button class="kiosk-btn btn-secondary" onclick="showScreen('dashboard')">Back to Menu</button>
+                  <button class="kiosk-btn btn-success" onclick="executeDeposit()">Confirm Deposit &rarr;</button>
+                </div>
+              </div>
+
+              <!-- STATE 7: BALANCE SCREEN -->
+              <div id="screen-balance" class="screen-state">
+                <div class="screen-header">
+                  <div class="screen-breadcrumb">Account Standing &bull; Balance Inquiry</div>
+                  <div class="screen-title">Official Account Balance</div>
+                  <div class="screen-subtitle">Real-time audited statement of funds and transaction allowances</div>
+                </div>
+
+                <div class="step-card" style="max-width: 540px;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+                    <div>
+                      <div style="font-size: 18px; font-weight: 700;" id="balCustName">Alexander Vance</div>
+                      <div style="font-size: 13px; color: var(--accent-cyan); font-family: var(--font-mono);" id="balAccNum">Account Number: ACC-1001-8842</div>
+                      <div style="font-size: 12px; color: var(--text-muted);">Account Category: SAVINGS</div>
+                    </div>
+                    <div style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 12px;">ACTIVE &bull;</div>
+                  </div>
+
+                  <div style="background: #090f1f; border: 1px solid var(--accent-cyan); border-radius: 12px; padding: 16px; margin-bottom: 14px;">
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-dim); letter-spacing: 1px;">CURRENT AVAILABLE BALANCE</div>
+                    <div style="font-size: 36px; font-weight: 800; color: var(--success); font-family: var(--font-mono);" id="balMainAmount">$5,420.50</div>
+                  </div>
+
+                  <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
+                    <span>Daily Withdrawal Limit: $2,000.00</span>
+                    <span id="balCardMasked">Card: **** 4455</span>
+                  </div>
+                </div>
+
+                <div class="screen-controls">
+                  <button class="kiosk-btn btn-secondary" onclick="showScreen('dashboard')">Back to Menu</button>
+                  <button class="kiosk-btn btn-primary" onclick="showReceipt('BALANCE_INQUIRY', 0)">Print Balance Slip</button>
+                  <button class="kiosk-btn btn-success" onclick="showScreen('withdraw')">Withdraw Cash</button>
+                </div>
+              </div>
+
+              <!-- STATE 8: MINI STATEMENT SCREEN -->
+              <div id="screen-statement" class="screen-state">
+                <div class="screen-header" style="margin-bottom: 10px;">
+                  <div class="screen-breadcrumb">Transaction History &bull; Audit Ledger</div>
+                  <div class="screen-title">Account Statement &amp; Activity</div>
+                  <div class="screen-subtitle">Chronological record of recent deposits, withdrawals, and wire transfers</div>
+                </div>
+
+                <div style="background: #0d1527; border: 1px solid var(--border-card); border-radius: 10px; overflow: hidden; margin-bottom: 12px; max-height: 220px; overflow-y: auto;">
+                  <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+                    <thead>
+                      <tr style="background: #111a33; color: var(--text-muted);">
+                        <th style="padding: 8px 12px;">Tx ID</th>
+                        <th style="padding: 8px 12px;">Date / Time</th>
+                        <th style="padding: 8px 12px;">Type</th>
+                        <th style="padding: 8px 12px;">Amount</th>
+                        <th style="padding: 8px 12px;">Balance After</th>
+                        <th style="padding: 8px 12px;">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="statementTableBody">
+                      <!-- Rendered by JS -->
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; background: #111a33; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 700;">
+                  <span style="color: var(--success);" id="totalCreditsText">Total Credits: +$2,400.00</span>
+                  <span style="color: var(--danger);" id="totalDebitsText">Total Debits: -$300.00</span>
+                </div>
+
+                <div class="screen-controls">
+                  <button class="kiosk-btn btn-secondary" onclick="showScreen('dashboard')">Back to Menu</button>
+                  <button class="kiosk-btn btn-primary" onclick="showReceipt('MINI_STATEMENT', 0)">Print Selected Receipt</button>
+                </div>
+              </div>
+
+              <!-- STATE 9: SUCCESS / RECEIPT MODAL -->
+              <div id="screen-receipt" class="screen-state">
+                <div class="screen-header" style="margin-bottom: 12px;">
+                  <div class="screen-breadcrumb">Security Verified &bull; Transaction Complete</div>
+                  <div class="screen-title" id="receiptOutcomeTitle">Transaction Approved</div>
+                  <div class="screen-subtitle">Your receipt has been issued by the thermal printer</div>
+                </div>
+
+                <!-- Thermal Paper Slip -->
+                <div class="thermal-slip">
+                  <div class="receipt-center">
+                    <div style="font-weight: 700; font-size: 13px;">APEX NATIONAL BANK</div>
+                    <div>WORLDWIDE ATM SERVICES</div>
+                    <div style="font-size: 10px; color: #64748b;">TERMINAL: #ATM-TERMINAL-01</div>
+                  </div>
+                  <div class="receipt-divider"></div>
+                  <div class="receipt-row"><span>DATE / TIME:</span><span id="rcDate">2026-09-26 15:20:00</span></div>
+                  <div class="receipt-row"><span>TX ID:</span><span id="rcTxId">TX-9981-APEX</span></div>
+                  <div class="receipt-row"><span>CARD NO:</span><span id="rcCard">4532 **** **** 4455</span></div>
+                  <div class="receipt-row"><span>OPERATION:</span><span id="rcOp">WITHDRAWAL</span></div>
+                  <div class="receipt-row"><span>AMOUNT:</span><span id="rcAmt">$100.00</span></div>
+                  <div class="receipt-row"><span>AVAIL BAL:</span><span id="rcBal">$5,320.50</span></div>
+                  <div class="receipt-row"><span>STATUS:</span><span style="font-weight: 700;">SUCCESS (APPROVED)</span></div>
+                  <div class="receipt-divider"></div>
+                  <div class="receipt-center" style="font-size: 10px; color: #64748b;">
+                    <div>AUTH HASH: <strong id="rcHash">98FA12-APEX-01</strong></div>
+                    <div>THANK YOU FOR BANKING WITH APEX</div>
+                  </div>
+                  <div class="barcode-emulation"></div>
+                </div>
+
+                <div class="screen-controls">
+                  <button class="kiosk-btn btn-primary" onclick="showScreen('dashboard')">Return to Dashboard</button>
+                  <button class="kiosk-btn btn-secondary" onclick="ejectCard()">Eject Card &amp; Exit</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Bottom Hardware Peripherals Console -->
+          <div class="hardware-console">
+            <div class="peripheral-strip">
+              <div class="periph-row">
+                <span>&bull; CHIP CARD READER</span>
+                <span class="periph-active" id="readerStatusText">CARD INSERTED [READY]</span>
+              </div>
+              <div class="periph-row">
+                <span>&bull; THERMAL RECEIPT PRINTER</span>
+                <span class="periph-active">SLOT READY [PAPER OK]</span>
+              </div>
+              <div class="periph-row">
+                <span>&bull; CASH DISPENSER &amp; HOPPER</span>
+                <span class="periph-active">SECURED [STOCK OK]</span>
+              </div>
+            </div>
+
+            <!-- Hardware Pinpad -->
+            <div class="keypad-grid">
+              <button class="key-btn" onclick="pressKey('1')">1</button>
+              <button class="key-btn" onclick="pressKey('2')">2</button>
+              <button class="key-btn" onclick="pressKey('3')">3</button>
+              <button class="key-btn" onclick="pressKey('4')">4</button>
+              <button class="key-btn" onclick="pressKey('5')">5</button>
+              <button class="key-btn" onclick="pressKey('6')">6</button>
+              <button class="key-btn" onclick="pressKey('7')">7</button>
+              <button class="key-btn" onclick="pressKey('8')">8</button>
+              <button class="key-btn" onclick="pressKey('9')">9</button>
+              <button class="key-btn action-cancel" onclick="pressCancel()">C</button>
+              <button class="key-btn" onclick="pressKey('0')">0</button>
+              <button class="key-btn action-enter" onclick="pressEnter()">&crarr;</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Sidebar Information Panel -->
+        <div class="sidebar-panel">
+          <div class="side-title">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>ATM Simulator Telemetry</span>
+          </div>
+
+          <div class="meta-list">
+            <div class="meta-item">
+              <span class="meta-label">System Architecture:</span>
+              <span class="meta-val">Java SE 21 + SQLite</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">ACID Compliance:</span>
+              <span class="meta-val" style="color: var(--success);">WAL Mode Active</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Active Session:</span>
+              <span class="meta-val" id="telemetryCust">Alexander Vance</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Terminal Vault Reserve:</span>
+              <span class="meta-val" style="color: var(--accent-cyan);">$16,500.00</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Authentication Hash:</span>
+              <span class="meta-val">SHA-256</span>
+            </div>
+          </div>
+
+          <div style="font-size: 13px; line-height: 1.6; color: var(--text-muted); margin-bottom: 20px;">
+            This interactive simulator reflects the exact screens, calculation algorithms, and multi-step transaction flows implemented in the <strong>Java Swing ATM Kiosk System</strong>.
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <a href="ATM_Transaction_Simulation_System_Report.pdf" target="_blank" class="kiosk-btn btn-primary" style="justify-content: center; text-decoration: none;">
+              Open Full 9-Page PDF Report
+            </a>
+            <button class="kiosk-btn btn-secondary" style="justify-content: center;" onclick="resetSimulator()">
+              Reset Simulation State
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==========================================
+         TAB 2: HIGH-RESOLUTION SCREEN GALLERY
+         ========================================== -->
+    <div id="tab-gallery" class="tab-view">
+      <div style="margin-bottom: 24px;">
+        <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 6px;">Official ATM Kiosk UI Screens</h2>
+        <p style="color: var(--text-muted); font-size: 14px;">High-resolution captures generated by the automated PDF report generator across all 11 user journeys.</p>
+      </div>
+
+      <div class="gallery-grid">
+        <div class="gallery-card">
+          <img src="screenshots/01_Welcome_Screen.png" class="gallery-img" alt="Welcome Screen">
+          <div class="gallery-info">
+            <div class="gallery-badge">Screen 01</div>
+            <div class="gallery-title">Card Insertion &amp; Demo Selector</div>
+            <div class="gallery-desc">Dynamic debit card visual with chip simulation, manual card entry, and quick demo profile selectors.</div>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="screenshots/02_PIN_Entry_Screen.png" class="gallery-img" alt="PIN Entry Screen">
+          <div class="gallery-info">
+            <div class="gallery-badge">Screen 02</div>
+            <div class="gallery-title">Secure 4-Digit PIN Authentication</div>
+            <div class="gallery-desc">Glow-indicator 4-digit security boxes, attempt counter warning, and card status badge.</div>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="screenshots/03_Main_Menu_Screen.png" class="gallery-img" alt="Main Menu Screen">
+          <div class="gallery-info">
+            <div class="gallery-badge">Screen 03</div>
+            <div class="gallery-title">Transaction Navigation Dashboard</div>
+            <div class="gallery-desc">Account overview with live balance, daily limit, and 8 color-accented action tiles with keypad shortcuts.</div>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="screenshots/04_Balance_Inquiry_Screen.png" class="gallery-img" alt="Balance Inquiry Screen">
+          <div class="gallery-info">
+            <div class="gallery-badge">Screen 04</div>
+            <div class="gallery-title">Official Account Balance</div>
+            <div class="gallery-desc">Audited statement view with daily withdrawal limit, status pill, and direct withdrawal shortcuts.</div>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="screenshots/05_Fast_Cash_Screen.png" class="gallery-img" alt="Fast Cash Screen">
+          <div class="gallery-info">
+            <div class="gallery-badge">Screen 05</div>
+            <div class="gallery-title">Fast Cash 1-Touch Presets</div>
+            <div class="gallery-desc">Preset cash denominations ($20 to $500) with explicit note breakdowns and confirmation state.</div>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="screenshots/06_Cash_Withdrawal_Screen.png" class="gallery-img" alt="Cash Withdrawal Screen">
+          <div class="gallery-info">
+            <div class="gallery-badge">Screen 06</div>
+            <div class="gallery-title">Multi-Step Cash Withdrawal</div>
+            <div class="gallery-desc">Custom withdrawal input, real-time banknote optimization breakdown, $0 fee review, and dispense state.</div>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="screenshots/07_Cash_Deposit_Screen.png" class="gallery-img" alt="Cash Deposit Screen">
+          <div class="gallery-info">
+            <div class="gallery-badge">Screen 07</div>
+            <div class="gallery-title">Banknote Deposit Hopper</div>
+            <div class="gallery-desc">Auto-totaling note hopper for $100, $50, $20, $10 bills with immediate account balance credit.</div>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="screenshots/08_Fund_Transfer_Screen.png" class="gallery-img" alt="Fund Transfer Screen">
+          <div class="gallery-info">
+            <div class="gallery-badge">Screen 08</div>
+            <div class="gallery-title">Electronic Fund Transfer</div>
+            <div class="gallery-desc">Inter-account wire transfer with beneficiary selector, duplicate check, and instant ledger entry.</div>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="screenshots/09_Mini_Statement_Screen.png" class="gallery-img" alt="Mini Statement Screen">
+          <div class="gallery-info">
+            <div class="gallery-badge">Screen 09</div>
+            <div class="gallery-title">Audit Ledger &amp; Mini-Statement</div>
+            <div class="gallery-desc">Interactive transaction ledger with category filter pills, credit/debit badge coloring, and receipt print.</div>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="screenshots/10_PIN_Change_Screen.png" class="gallery-img" alt="PIN Change Screen">
+          <div class="gallery-info">
+            <div class="gallery-badge">Screen 10</div>
+            <div class="gallery-title">PIN Security Management</div>
+            <div class="gallery-desc">Live validation checklist verifying 4-digit length, matching confirmation, and distinct new code.</div>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="screenshots/11_Thermal_Receipt_Slip.png" class="gallery-img" alt="Thermal Receipt Slip">
+          <div class="gallery-info">
+            <div class="gallery-badge">Screen 11</div>
+            <div class="gallery-title">Thermal Paper Receipt Slip</div>
+            <div class="gallery-desc">Authentic thermal receipt with drop shadow, perforated zigzag top edge, audit security hash, and barcode.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         TAB 3: DATABASE & ARCHITECTURE
+         ========================================== -->
+    <div id="tab-database" class="tab-view">
+      <div style="margin-bottom: 24px;">
+        <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 6px;">Relational Database &amp; Ledger Architecture</h2>
+        <p style="color: var(--text-muted); font-size: 14px;">Normalized relational tables operating under ACID transactional guarantees in SQLite with WAL mode.</p>
+      </div>
+
+      <div class="db-section">
+        <div class="db-table-title">1. ACCOUNTS &amp; CUSTOMERS</div>
+        <div class="db-table-responsive">
+          <table class="db-table">
+            <thead>
+              <tr><th>Account Number</th><th>Customer Name</th><th>Type</th><th>Available Balance</th><th>Daily Limit</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>ACC-1001-8842</td><td>Alexander Vance</td><td>SAVINGS</td><td style="color: var(--success);">$5,420.50</td><td>$2,000.00</td><td>ACTIVE</td></tr>
+              <tr><td>ACC-1001-8843</td><td>Alexander Vance</td><td>CHECKING</td><td style="color: var(--success);">$1,250.00</td><td>$1,500.00</td><td>ACTIVE</td></tr>
+              <tr><td>ACC-2002-9951</td><td>Sarah Connor</td><td>SAVINGS</td><td style="color: var(--success);">$12,850.00</td><td>$3,000.00</td><td>ACTIVE</td></tr>
+              <tr><td>ACC-3003-7712</td><td>Bruce Wayne</td><td>CHECKING</td><td style="color: var(--success);">$95,000.00</td><td>$10,000.00</td><td>ACTIVE</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="db-section">
+        <div class="db-table-title">2. ATM CARDS</div>
+        <div class="db-table-responsive">
+          <table class="db-table">
+            <thead>
+              <tr><th>Card Number</th><th>Account Number</th><th>Cardholder Name</th><th>PIN Hash (SHA-256)</th><th>Status</th><th>Failed Attempts</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>4532 **** **** 4455</td><td>ACC-1001-8842</td><td>Alexander Vance</td><td>03ac674216f3e15c... (1234)</td><td>ACTIVE</td><td>0 / 3</td></tr>
+              <tr><td>5120 **** **** 7788</td><td>ACC-2002-9951</td><td>Sarah Connor</td><td>b512d7b68631c518... (4321)</td><td>ACTIVE</td><td>0 / 3</td></tr>
+              <tr><td>6011 **** **** 5544</td><td>ACC-3003-7712</td><td>Bruce Wayne</td><td>15e2b0d3c33891eb... (9999)</td><td>ACTIVE</td><td>0 / 3</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="db-section">
+        <div class="db-table-title">3. ATM CASH INVENTORY (HARDWARE VAULT)</div>
+        <div class="db-table-responsive">
+          <table class="db-table">
+            <thead>
+              <tr><th>Terminal ID</th><th>$100 Bills</th><th>$50 Bills</th><th>$20 Bills</th><th>$10 Bills</th><th>Total Vault Reserve</th><th>Last Audit</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>ATM-TERMINAL-01</td><td>100 notes ($10k)</td><td>80 notes ($4k)</td><td>100 notes ($2k)</td><td>50 notes ($500)</td><td style="color: var(--accent-cyan); font-weight: 700;">$16,500.00</td><td>2026-09-26 15:00:00</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         TAB 4: PDF REPORT VIEWER
+         ========================================== -->
+    <div id="tab-pdf" class="tab-view">
+      <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 4px;">System Engineering &amp; Verification Report</h2>
+          <p style="color: var(--text-muted); font-size: 14px;">9-page formal technical specification and visual verification document generated in pure Java SE.</p>
+        </div>
+        <a href="ATM_Transaction_Simulation_System_Report.pdf" target="_blank" download class="kiosk-btn btn-primary" style="text-decoration: none;">
+          Download PDF (1.8 MB)
+        </a>
+      </div>
+
+      <div class="pdf-embed-wrapper">
+        <iframe src="ATM_Transaction_Simulation_System_Report.pdf" class="pdf-embed-frame"></iframe>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // Tab Switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-view').forEach(view => view.classList.remove('active'));
+
+      event.target.classList.add('active');
+      document.getElementById('tab-' + tabId).classList.add('active');
+    }
+
+    // Live Clock
+    setInterval(() => {
+      const now = new Date();
+      const str = now.toISOString().replace('T', ' ').substring(0, 19);
+      document.getElementById('clock-display').innerText = str + ' • ONLINE';
+    }, 1000);
+
+    // Simulator State
+    let currentAccount = {
+      name: 'Alexander Vance',
+      cardNum: '4532110022334455',
+      masked: '4532 •••• •••• 4455',
+      pin: '1234',
+      balance: 5420.50,
+      accountNum: 'ACC-1001-8842'
+    };
+
+    let enteredPin = '';
+    let withdrawAmount = 100;
+
+    let transactionLedger = [
+      { id: 'TX-88219A', date: '2026-09-26 14:53:37', type: 'DEPOSIT', amount: 400.00, balAfter: 5720.50, status: 'SUCCESS' },
+      { id: 'TX-77192B', date: '2026-09-26 14:32:10', type: 'WITHDRAWAL', amount: -100.00, balAfter: 5320.50, status: 'SUCCESS' },
+      { id: 'TX-66104C', date: '2026-09-21 09:15:00', type: 'FAST_CASH', amount: -200.00, balAfter: 5420.50, status: 'SUCCESS' }
+    ];
+
+    function selectDemoAccount(name, cardNum, pin, balance) {
+      document.querySelectorAll('.demo-chip-btn').forEach(b => b.classList.remove('selected'));
+      event.target.classList.add('selected');
+
+      currentAccount.name = name;
+      currentAccount.cardNum = cardNum;
+      currentAccount.masked = cardNum.substring(0, 4) + ' •••• •••• ' + cardNum.substring(12);
+      currentAccount.pin = pin;
+      currentAccount.balance = balance;
+
+      document.getElementById('cardHolderPreview').innerText = name;
+      document.getElementById('cardNumPreview').innerText = currentAccount.masked;
+      document.getElementById('telemetryCust').innerText = name;
+      document.getElementById('demoPinDisplay').innerText = pin;
+    }
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen-state').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById('screen-' + screenId);
+      if (target) target.classList.add('active');
+
+      // Update values
+      document.getElementById('dashBalanceVal').innerText = '$' + currentAccount.balance.toFixed(2);
+      document.getElementById('withAvailBal').innerText = '$' + currentAccount.balance.toFixed(2);
+      document.getElementById('balMainAmount').innerText = '$' + currentAccount.balance.toFixed(2);
+      document.getElementById('balCustName').innerText = currentAccount.name;
+    }
+
+    function proceedToPin() {
+      enteredPin = '';
+      updatePinDisplay();
+      document.getElementById('pinAuthCardholder').innerText = currentAccount.name;
+      document.getElementById('pinAuthCardMasked').innerText = 'Card: ' + currentAccount.masked;
+      showScreen('pin');
+    }
+
+    function pressKey(num) {
+      const pinScreen = document.getElementById('screen-pin');
+      if (pinScreen.classList.contains('active')) {
+        if (enteredPin.length < 4) {
+          enteredPin += num;
+          updatePinDisplay();
+          if (enteredPin.length === 4) {
+            setTimeout(verifyPin, 300);
+          }
+        }
+      }
+    }
+
+    function pressCancel() {
+      enteredPin = '';
+      updatePinDisplay();
+      ejectCard();
+    }
+
+    function pressEnter() {
+      const pinScreen = document.getElementById('screen-pin');
+      if (pinScreen.classList.contains('active')) {
+        verifyPin();
+      }
+    }
+
+    function updatePinDisplay() {
+      for (let i = 0; i < 4; i++) {
+        const box = document.getElementById('pinBox' + i);
+        if (i < enteredPin.length) {
+          box.classList.add('filled');
+          box.innerText = '●';
+        } else {
+          box.classList.remove('filled');
+          box.innerText = '';
+        }
+      }
+    }
+
+    function verifyPin() {
+      if (enteredPin === currentAccount.pin) {
+        showScreen('dashboard');
+        renderStatementTable();
+      } else {
+        alert('Invalid PIN Code. For demo, use: ' + currentAccount.pin);
+        enteredPin = '';
+        updatePinDisplay();
+      }
+    }
+
+    function ejectCard() {
+      enteredPin = '';
+      showScreen('welcome');
+    }
+
+    // Withdrawal Functions
+    function addWithdrawAmount(amt) {
+      withdrawAmount += amt;
+      updateWithdrawDisplay();
+    }
+
+    function resetWithdrawAmount() {
+      withdrawAmount = 0;
+      updateWithdrawDisplay();
+    }
+
+    function updateWithdrawDisplay() {
+      document.getElementById('withAmountDisplay').innerText = '$' + withdrawAmount;
+      // Calculate breakdown
+      let rem = withdrawAmount;
+      const n100 = Math.floor(rem / 100); rem %= 100;
+      const n50 = Math.floor(rem / 50); rem %= 50;
+      const n20 = Math.floor(rem / 20); rem %= 20;
+      const n10 = Math.floor(rem / 10);
+
+      let parts = [];
+      if (n100 > 0) parts.push(n100 + ' × $100');
+      if (n50 > 0) parts.push(n50 + ' × $50');
+      if (n20 > 0) parts.push(n20 + ' × $20');
+      if (n10 > 0) parts.push(n10 + ' × $10');
+
+      document.getElementById('withNoteBreakdown').innerText = parts.length > 0 ? parts.join(', ') + ' bills' : '0 bills';
+    }
+
+    function confirmWithdrawal() {
+      if (withdrawAmount <= 0) {
+        alert('Please specify an amount greater than $0.');
+        return;
+      }
+      if (withdrawAmount > currentAccount.balance) {
+        alert('Insufficient Funds! Available: $' + currentAccount.balance.toFixed(2));
+        return;
+      }
+
+      currentAccount.balance -= withdrawAmount;
+      showReceipt('WITHDRAWAL', withdrawAmount);
+    }
+
+    function executeFastCash(amt) {
+      if (amt > currentAccount.balance) {
+        alert('Insufficient Funds!');
+        return;
+      }
+      currentAccount.balance -= amt;
+      showReceipt('FAST_CASH', amt);
+    }
+
+    // Deposit Functions
+    function calculateDepositTotal() {
+      const b100 = parseInt(document.getElementById('dep100').value || '0') * 100;
+      const b50 = parseInt(document.getElementById('dep50').value || '0') * 50;
+      const b20 = parseInt(document.getElementById('dep20').value || '0') * 20;
+      const b10 = parseInt(document.getElementById('dep10').value || '0') * 10;
+      const tot = b100 + b50 + b20 + b10;
+      document.getElementById('depTotalDisplay').innerText = '$' + tot.toFixed(2);
+      return tot;
+    }
+
+    function executeDeposit() {
+      const tot = calculateDepositTotal();
+      if (tot <= 0) {
+        alert('Please enter at least 1 banknote.');
+        return;
+      }
+      currentAccount.balance += tot;
+      document.getElementById('dep100').value = 0;
+      document.getElementById('dep50').value = 0;
+      document.getElementById('dep20').value = 0;
+      document.getElementById('dep10').value = 0;
+      document.getElementById('depTotalDisplay').innerText = '$0.00';
+      showReceipt('DEPOSIT', tot);
+    }
+
+    function showReceipt(opType, amt) {
+      const now = new Date();
+      const dateStr = now.toISOString().replace('T', ' ').substring(0, 19);
+      const txId = 'TX-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+      document.getElementById('rcDate').innerText = dateStr;
+      document.getElementById('rcTxId').innerText = txId;
+      document.getElementById('rcCard').innerText = currentAccount.masked;
+      document.getElementById('rcOp').innerText = opType;
+      document.getElementById('rcAmt').innerText = amt > 0 ? '$' + amt.toFixed(2) : '--';
+      document.getElementById('rcBal').innerText = '$' + currentAccount.balance.toFixed(2);
+      document.getElementById('rcHash').innerText = Math.random().toString(16).substring(2, 8).toUpperCase() + '-APEX-01';
+
+      // Prepend to statement
+      if (amt !== 0) {
+        transactionLedger.unshift({
+          id: txId,
+          date: dateStr,
+          type: opType,
+          amount: opType === 'DEPOSIT' ? amt : -amt,
+          balAfter: currentAccount.balance,
+          status: 'SUCCESS'
+        });
+      }
+
+      showScreen('receipt');
+    }
+
+    function renderStatementTable() {
+      const tbody = document.getElementById('statementTableBody');
+      tbody.innerHTML = '';
+
+      let credits = 0;
+      let debits = 0;
+
+      transactionLedger.forEach(tx => {
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+
+        const amtColor = tx.amount > 0 ? 'var(--success)' : 'var(--danger)';
+        const amtStr = (tx.amount > 0 ? '+' : '') + '$' + Math.abs(tx.amount).toFixed(2);
+
+        if (tx.amount > 0) credits += tx.amount;
+        else debits += Math.abs(tx.amount);
+
+        tr.innerHTML = `
+          <td style="padding: 8px 12px; font-family: var(--font-mono);">${tx.id}</td>
+          <td style="padding: 8px 12px;">${tx.date}</td>
+          <td style="padding: 8px 12px; color: var(--accent-cyan); font-weight: 600;">${tx.type}</td>
+          <td style="padding: 8px 12px; color: ${amtColor}; font-weight: 700;">${amtStr}</td>
+          <td style="padding: 8px 12px; font-family: var(--font-mono);">$${tx.balAfter.toFixed(2)}</td>
+          <td style="padding: 8px 12px; color: var(--success); font-weight: 700;">${tx.status}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('totalCreditsText').innerText = 'Total Credits: +$' + credits.toFixed(2);
+      document.getElementById('totalDebitsText').innerText = 'Total Debits: -$' + debits.toFixed(2);
+    }
+
+    function resetSimulator() {
+      currentAccount.balance = 5420.50;
+      ejectCard();
+    }
+
+    // Initialize
+    updateWithdrawDisplay();
+  </script>
+</body>
+</html>
