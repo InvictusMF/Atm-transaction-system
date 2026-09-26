@@ -39,7 +39,13 @@ public class ModernButton extends JButton {
         REFRESH,
         CARD,
         SHIELD,
-        ENTER
+        ENTER,
+        TRANSFER,
+        DEPOSIT,
+        HISTORY,
+        LOGOUT,
+        LOCK,
+        INFO
     }
 
     private ButtonType buttonType;
@@ -430,6 +436,44 @@ public class ModernButton extends JButton {
                 // Right chevron: >
                 g2.drawLine(x + 2, y + 2, x + size - 3, y + size / 2);
                 g2.drawLine(x + size - 3, y + size / 2, x + 2, y + size - 2);
+                break;
+            case TRANSFER:
+                // Double horizontal exchange arrows
+                g2.drawLine(x + 1, y + 4, x + size - 2, y + 4);
+                g2.drawLine(x + size - 5, y + 1, x + size - 2, y + 4);
+                g2.drawLine(x + 1, y + size - 4, x + size - 2, y + size - 4);
+                g2.drawLine(x + 4, y + size - 1, x + 1, y + size - 4);
+                break;
+            case DEPOSIT:
+                // Tray with down arrow
+                g2.drawRoundRect(x + 1, y + size / 2, size - 2, size / 2 - 1, 2, 2);
+                g2.drawLine(x + size / 2, y + 1, x + size / 2, y + size - 4);
+                g2.drawLine(x + size / 2 - 3, y + size - 7, x + size / 2, y + size - 4);
+                g2.drawLine(x + size / 2 + 3, y + size - 7, x + size / 2, y + size - 4);
+                break;
+            case HISTORY:
+                // Clock face
+                g2.drawOval(x + 1, y + 1, size - 2, size - 2);
+                g2.drawLine(x + size / 2, y + size / 2, x + size / 2, y + 4);
+                g2.drawLine(x + size / 2, y + size / 2, x + size - 4, y + size / 2);
+                break;
+            case LOGOUT:
+                // Door exit arrow
+                g2.drawRect(x + 1, y + 1, size / 2, size - 2);
+                g2.drawLine(x + size / 3, y + size / 2, x + size - 1, y + size / 2);
+                g2.drawLine(x + size - 4, y + size / 2 - 3, x + size - 1, y + size / 2);
+                g2.drawLine(x + size - 4, y + size / 2 + 3, x + size - 1, y + size / 2);
+                break;
+            case LOCK:
+                // Padlock
+                g2.drawRoundRect(x + 2, y + size / 2 - 1, size - 4, size / 2, 2, 2);
+                g2.drawArc(x + 4, y + 1, size - 8, size / 2 + 2, 0, 180);
+                break;
+            case INFO:
+                // Circle with 'i'
+                g2.drawOval(x + 1, y + 1, size - 2, size - 2);
+                g2.fillRect(x + size / 2 - 1, y + 4, 2, 2);
+                g2.drawLine(x + size / 2, y + 7, x + size / 2, y + size - 4);
                 break;
             case NONE:
             default:

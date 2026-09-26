@@ -149,7 +149,7 @@ public class AtmKioskFrame extends JFrame {
         bankTitle.setForeground(UITheme.ACCENT_CYAN);
 
         terminalStatusLabel = new JLabel("TERMINAL #ATM-TERMINAL-01  |  ONLINE ●");
-        terminalStatusLabel.setFont(UITheme.FONT_MONO);
+        terminalStatusLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
         terminalStatusLabel.setForeground(UITheme.SUCCESS_GREEN);
 
         textStack.add(bankTitle);
@@ -157,26 +157,29 @@ public class AtmKioskFrame extends JFrame {
 
         brandPanel.add(logoIcon);
         brandPanel.add(textStack);
-        marquee.add(brandPanel, BorderLayout.WEST);
+        marquee.add(brandPanel, BorderLayout.CENTER);
 
-        // Center Clock
-        clockLabel = new JLabel("2026-09-21 00:00:00", SwingConstants.CENTER);
-        clockLabel.setFont(UITheme.FONT_MONO_BOLD);
-        clockLabel.setForeground(UITheme.TEXT_WHITE);
-        marquee.add(clockLabel, BorderLayout.CENTER);
-
-        // Right Action Utilities (PDF Export & DB Viewer)
+        // Right Action Utilities & Live Clock
         JPanel utilPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         utilPanel.setBackground(new Color(15, 23, 42));
 
+        clockLabel = new JLabel("2026-09-21 00:00:00", SwingConstants.RIGHT);
+        clockLabel.setFont(UITheme.FONT_MONO);
+        clockLabel.setForeground(UITheme.TEXT_MUTED);
+        clockLabel.setPreferredSize(new Dimension(150, 30));
+        clockLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 6));
+
         JButton dbViewBtn = UITheme.createModernButton("View Database", new Color(51, 65, 85), Color.WHITE);
         dbViewBtn.setFont(UITheme.FONT_BODY_BOLD);
+        dbViewBtn.setPreferredSize(new Dimension(135, 34));
         dbViewBtn.addActionListener(e -> showDatabaseViewerDialog());
 
-        JButton exportPdfBtn = UITheme.createModernButton("Generate Single PDF Report", UITheme.ACCENT_BLUE, Color.WHITE);
+        JButton exportPdfBtn = UITheme.createModernButton("Generate PDF Report", UITheme.ACCENT_BLUE, Color.WHITE);
         exportPdfBtn.setFont(UITheme.FONT_BODY_BOLD);
+        exportPdfBtn.setPreferredSize(new Dimension(175, 34));
         exportPdfBtn.addActionListener(e -> generateReportPdf());
 
+        utilPanel.add(clockLabel);
         utilPanel.add(dbViewBtn);
         utilPanel.add(exportPdfBtn);
         marquee.add(utilPanel, BorderLayout.EAST);
@@ -226,7 +229,8 @@ public class AtmKioskFrame extends JFrame {
         receiptSlotPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(51, 65, 85), 1, true),
                 BorderFactory.createEmptyBorder(6, 12, 6, 12)
-               JLabel receiptLabel = new JLabel("● THERMAL RECEIPT PRINTER  [ SLOT READY ]");
+        ));
+        JLabel receiptLabel = new JLabel("● THERMAL RECEIPT PRINTER  [ SLOT READY ]");
         receiptLabel.setFont(UITheme.FONT_MONO);
         receiptLabel.setForeground(UITheme.TEXT_MUTED);
         receiptSlotPanel.add(receiptLabel, BorderLayout.CENTER);

@@ -2,6 +2,7 @@ package com.atm.ui.screens;
 
 import com.atm.model.Transaction;
 import com.atm.service.AtmSession;
+import com.atm.ui.ModernButton;
 import com.atm.ui.ScreenManager;
 import com.atm.ui.UITheme;
 
@@ -19,79 +20,82 @@ public class BalanceScreen extends JPanel implements ScreenManager.RefreshableSc
     private JLabel balanceAmountLabel;
     private JLabel limitLabel;
     private JLabel statusBadge;
+    private JLabel cardNumLabel;
 
     public BalanceScreen(ScreenManager screenManager) {
         this.screenManager = screenManager;
-        setLayout(new BorderLayout(15, 15));
+        setLayout(new BorderLayout(14, 14));
         setBackground(UITheme.SCREEN_BG);
-        setBorder(BorderFactory.createEmptyBorder(20, 35, 20, 35));
+        setBorder(BorderFactory.createEmptyBorder(18, 35, 18, 35));
 
         initComponents();
     }
 
     private void initComponents() {
         // Header
-        JPanel headerPanel = new JPanel();
-        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
-        headerPanel.setBackground(UITheme.SCREEN_BG);
-
-        JLabel title = new JLabel("REAL-TIME BALANCE INQUIRY", SwingConstants.CENTER);
-        title.setFont(UITheme.FONT_TITLE_LARGE);
-        title.setForeground(UITheme.ACCENT_CYAN);
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JLabel subtitle = new JLabel("Official Statement of Account Standing", SwingConstants.CENTER);
-        subtitle.setFont(UITheme.FONT_SUBTITLE);
-        subtitle.setForeground(UITheme.TEXT_MUTED);
-        subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        headerPanel.add(title);
-        headerPanel.add(Box.createVerticalStrut(4));
-        headerPanel.add(subtitle);
+        JPanel headerPanel = UITheme.createScreenHeader(
+                "ACCOUNT STANDING  •  BALANCE INQUIRY",
+                "Official Account Balance",
+                "Real-time audited statement of funds and transaction allowances"
+        );
         add(headerPanel, BorderLayout.NORTH);
 
         // Center Content Card
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-        centerPanel.setBackground(UITheme.SCREEN_BG);
+        centerPanel.setOpaque(false);
 
-        JPanel balanceCard = UITheme.createCardPanel();
+        JPanel balanceCard = UITheme.createCardPanel(20);
         balanceCard.setLayout(new BoxLayout(balanceCard, BoxLayout.Y_AXIS));
-        balanceCard.setMaximumSize(new Dimension(500, 240));
+        balanceCard.setMaximumSize(new Dimension(560, 260));
+
+        // Account Details Row
+        JPanel topRow = new JPanel(new BorderLayout());
+        topRow.setOpaque(false);
+
+        JPanel userStack = new JPanel();
+        userStack.setLayout(new BoxLayout(userStack, BoxLayout.Y_AXIS));
+        userStack.setOpaque(false);
 
         nameLabel = new JLabel("Customer: --");
-        nameLabel.setFont(UITheme.FONT_BODY_BOLD);
+        nameLabel.setFont(UITheme.FONT_TITLE);
         nameLabel.setForeground(UITheme.TEXT_WHITE);
 
         accountNumLabel = new JLabel("Account Number: --");
         accountNumLabel.setFont(UITheme.FONT_MONO_BOLD);
-        accountNumLabel.setForeground(UITheme.TEXT_CYAN);
+        accountNumLabel.setForeground(UITheme.ACCENT_CYAN);
 
         typeLabel = new JLabel("Account Category: --");
-        typeLabel.setFont(UITheme.FONT_BODY);
+        typeLabel.setFont(UITheme.FONT_SMALL);
         typeLabel.setForeground(UITheme.TEXT_MUTED);
 
-        balanceCard.add(nameLabel);
-        balanceCard.add(Box.createVerticalStrut(4));
-        balanceCard.add(accountNumLabel);
-        balanceCard.add(Box.createVerticalStrut(4));
-        balanceCard.add(typeLabel);
+        userStack.add(nameLabel);
+        userStack.add(Box.createVerticalStrut(2));
+        userStack.add(accountNumLabel);
+        userStack.add(Box.createVerticalStrut(2));
+        userStack.add(typeLabel);
+
+        statusBadge = UITheme.createStatusBadge("ACTIVE ●", new Color(16, 185, 129, 40), UITheme.SUCCESS_GREEN);
+
+        topRow.add(userStack, BorderLayout.WEST);
+        topRow.add(statusBadge, BorderLayout.EAST);
+        balanceCard.add(topRow);
         balanceCard.add(Box.createVerticalStrut(14));
 
-        // Big Balance Highlight Banner
+        // Available Balance Highlight Box
         JPanel banner = new JPanel(new BorderLayout());
-        banner.setBackground(new Color(15, 23, 42));
+        banner.setBackground(new Color(11, 20, 38));
         banner.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(UITheme.ACCENT_CYAN, 1, true),
                 BorderFactory.createEmptyBorder(12, 18, 12, 18)
         ));
 
-        JLabel availText = new JLabel("AVAILABLE BALANCE");
-        availText.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        availText.setForeground(UITheme.TEXT_MUTED);
+        JLabel availText = new JLabel("CURRENT AVAILABLE BALANCE");
+        availText.setFont(UITheme.FONT_SMALL_BOLD);
+        availText.setForeground(UITheme.TEXT_DIM);
 
         balanceAmountLabel = new JLabel("$0.00");
-        balanceAmountLabel.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        balanceAmountLabel.setFont(new Font("Segoe UI", Font.BOLD, 36));
         balanceAmountLabel.setForeground(UITheme.SUCCESS_GREEN);
 
         banner.add(availText, BorderLayout.NORTH);
@@ -99,36 +103,41 @@ public class BalanceScreen extends JPanel implements ScreenManager.RefreshableSc
         balanceCard.add(banner);
         balanceCard.add(Box.createVerticalStrut(12));
 
-        // Limit & Status
+        // Meta details row (Daily Limit & Associated Card)
         JPanel metaRow = new JPanel(new BorderLayout());
-        metaRow.setBackground(UITheme.SCREEN_CARD);
+        metaRow.setOpaque(false);
+        metaRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
 
-        limitLabel = new JLabel("Daily Withdrawal Limit: $1,000.00");
-        limitLabel.setFont(UITheme.FONT_BODY);
+        limitLabel = new JLabel("Daily Withdrawal Limit: $2,000.00");
+        limitLabel.setFont(UITheme.FONT_SMALL);
         limitLabel.setForeground(UITheme.TEXT_MUTED);
 
-        statusBadge = new JLabel("Status: ACTIVE ●");
-        statusBadge.setFont(UITheme.FONT_BODY_BOLD);
-        statusBadge.setForeground(UITheme.SUCCESS_GREEN);
+        cardNumLabel = new JLabel("Card: **** 4455");
+        cardNumLabel.setFont(UITheme.FONT_MONO);
+        cardNumLabel.setForeground(UITheme.TEXT_MUTED);
+        cardNumLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 8));
 
         metaRow.add(limitLabel, BorderLayout.WEST);
-        metaRow.add(statusBadge, BorderLayout.EAST);
+        metaRow.add(cardNumLabel, BorderLayout.EAST);
         balanceCard.add(metaRow);
 
         centerPanel.add(balanceCard);
         add(centerPanel, BorderLayout.CENTER);
 
-        // Bottom Controls
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        bottomPanel.setBackground(UITheme.SCREEN_BG);
+        // Bottom Controls: Quick Action Shortcuts
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 14, 10));
+        bottomPanel.setOpaque(false);
 
-        JButton backBtn = UITheme.createModernButton("⬅ Back to Menu", UITheme.CHASSIS_BG, UITheme.TEXT_WHITE);
+        JButton backBtn = UITheme.createModernButton("Back to Menu", UITheme.CHASSIS_BG, UITheme.TEXT_WHITE);
+        backBtn.setPreferredSize(new Dimension(170, 42));
         backBtn.addActionListener(e -> screenManager.showScreen("MAIN_MENU"));
 
-        JButton printBtn = UITheme.createModernButton("🖨 Print Balance Slip", UITheme.ACCENT_BLUE, UITheme.TEXT_WHITE);
+        JButton printBtn = UITheme.createModernButton("Print Balance Slip", UITheme.ACCENT_BLUE, UITheme.TEXT_WHITE);
+        printBtn.setPreferredSize(new Dimension(190, 42));
         printBtn.addActionListener(e -> printBalanceReceipt());
 
-        JButton withdrawBtn = UITheme.createModernButton("💵 Withdraw Cash Now", UITheme.SUCCESS_GREEN, Color.BLACK);
+        JButton withdrawBtn = UITheme.createModernButton("Withdraw Cash", UITheme.SUCCESS_GREEN, Color.BLACK);
+        withdrawBtn.setPreferredSize(new Dimension(170, 42));
         withdrawBtn.addActionListener(e -> screenManager.showScreen("WITHDRAW"));
 
         bottomPanel.add(backBtn);
@@ -163,12 +172,13 @@ public class BalanceScreen extends JPanel implements ScreenManager.RefreshableSc
     public void refreshScreen() {
         AtmSession session = screenManager.getSession();
         if (session != null) {
-            nameLabel.setText("Customer: " + session.getCustomer().getFullName());
+            nameLabel.setText(session.getCustomer().getFullName());
             accountNumLabel.setText("Account Number: " + session.getAccount().getAccountNumber());
-            typeLabel.setText("Account Category: " + session.getAccount().getAccountType() + " (" + session.getAccount().getCurrency() + ")");
-            balanceAmountLabel.setText("$" + String.format("%.2f", session.getAccount().getBalance()));
-            limitLabel.setText("Daily Withdrawal Limit: $" + String.format("%.2f", session.getAccount().getDailyWithdrawalLimit()));
-            statusBadge.setText("Status: " + session.getAccount().getStatus() + " ●");
+            typeLabel.setText("Category: " + session.getAccount().getAccountType() + "  |  Currency: " + session.getAccount().getCurrency());
+            balanceAmountLabel.setText(UITheme.formatCurrency(session.getAccount().getBalance()));
+            limitLabel.setText("Daily Withdrawal Limit: " + UITheme.formatCurrency(session.getAccount().getDailyWithdrawalLimit()));
+            cardNumLabel.setText("Card: " + session.getCard().getMaskedCardNumber());
+            statusBadge.setText(" " + session.getAccount().getStatus() + " ● ");
         }
     }
 }

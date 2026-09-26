@@ -33,7 +33,7 @@ public class PdfReportGenerator {
      * Automates full screenshot capture of all screens and outputs a single submission-ready PDF.
      */
     public static String generateSystemReport(AtmKioskFrame liveFrame) {
-        String baseDir = "C:\\Users\\harsh ambetkar\\.gemini\\antigravity\\scratch\\atm-transaction-system";
+        String baseDir = System.getProperty("user.dir");
         File screenshotsDir = new File(baseDir, "screenshots");
         if (!screenshotsDir.exists()) screenshotsDir.mkdirs();
 
@@ -121,11 +121,12 @@ public class PdfReportGenerator {
                 "ATM-TERMINAL-01", "SUCCESS", "ATM Cash Dispense Approved", LocalDateTime.now()
         );
         ReceiptPopup receiptDialog = new ReceiptPopup(kiosk, auth.getSession(), sampleTx, "ATM Receipt Slip");
-        receiptDialog.setSize(380, 480);
-        receiptDialog.getContentPane().setSize(380, 480);
+        receiptDialog.setSize(420, 590);
+        receiptDialog.addNotify();
+        receiptDialog.getContentPane().setSize(420, 590);
         receiptDialog.getContentPane().doLayout();
         receiptDialog.getContentPane().validate();
-        capturedScreens.put("11_Thermal_Receipt_Slip", captureComponent(receiptDialog.getContentPane(), 380, 480));
+        capturedScreens.put("11_Thermal_Receipt_Slip", captureComponent(receiptDialog.getContentPane(), 420, 590));
         receiptDialog.dispose();
 
         // 12. Save all individual screenshot PNG files
