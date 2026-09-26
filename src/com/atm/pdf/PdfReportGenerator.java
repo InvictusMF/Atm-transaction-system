@@ -146,50 +146,57 @@ public class PdfReportGenerator {
         // BUILD REPORT PAGES (Letter/A4 Canvas)
         // -------------------------------------------------------------
 
-        // Page 1: Title & Executive Summary
+        // Page 1: Title & Executive Summary (Course Assignment Submission)
         pageImages.add(buildCoverPage());
 
-        // Page 2: Database Design - Architecture & ER Diagram
-        pageImages.add(buildDatabaseDesignPage1(db));
-
-        // Page 3: Database Design - Schema Tables & ACID Verification
-        pageImages.add(buildDatabaseDesignPage2(db));
-
-        // Page 4: Frontend UI Screenshots - Welcome & Authentication
+        // SECTION 1: FRONTEND / UI DEVELOPMENT (Screenshots)
+        // Page 2: Welcome & PIN Authentication
         pageImages.add(buildScreenshotsPage(
                 "Frontend Development: Welcome & PIN Authentication",
                 "Screen 1: Customer Card Insertion & Demo Selector", capturedScreens.get("01_Welcome_Screen"),
-                "Screen 2: Secure 4-Digit PIN Entry with Security Masking", capturedScreens.get("02_PIN_Entry_Screen")
+                "Screen 2: Secure 4-Digit PIN Entry with Security Masking", capturedScreens.get("02_PIN_Entry_Screen"),
+                2
         ));
 
-        // Page 5: Frontend UI Screenshots - Main Menu & Balance Inquiry
+        // Page 3: Main Menu & Balance Inquiry
         pageImages.add(buildScreenshotsPage(
                 "Frontend Development: Main Menu & Balance Inquiry",
                 "Screen 3: 8-Option Interactive ATM Navigation Dashboard", capturedScreens.get("03_Main_Menu_Screen"),
-                "Screen 4: Real-time Account Balance Statement & Daily Limits", capturedScreens.get("04_Balance_Inquiry_Screen")
+                "Screen 4: Real-time Account Balance Statement & Daily Limits", capturedScreens.get("04_Balance_Inquiry_Screen"),
+                3
         ));
 
-        // Page 6: Frontend UI Screenshots - Cash Dispensing Operations
+        // Page 4: Cash Dispensing Operations
         pageImages.add(buildScreenshotsPage(
                 "Frontend Development: Cash Withdrawal & Fast Cash",
                 "Screen 5: One-Touch Fast Cash Dispensing ($20 - $500)", capturedScreens.get("05_Fast_Cash_Screen"),
-                "Screen 6: Custom Cash Withdrawal with Denomination Calculator", capturedScreens.get("06_Cash_Withdrawal_Screen")
+                "Screen 6: Custom Cash Withdrawal with Denomination Calculator", capturedScreens.get("06_Cash_Withdrawal_Screen"),
+                4
         ));
 
-        // Page 7: Frontend UI Screenshots - Cash Deposit & Fund Transfer
+        // Page 5: Cash Deposit & Fund Transfer
         pageImages.add(buildScreenshotsPage(
                 "Frontend Development: Cash Deposit & Transfer",
                 "Screen 7: Banknote Deposit Hopper with Auto-Totaling", capturedScreens.get("07_Cash_Deposit_Screen"),
-                "Screen 8: Inter-Account Electronic Fund Transfer", capturedScreens.get("08_Fund_Transfer_Screen")
+                "Screen 8: Inter-Account Electronic Fund Transfer", capturedScreens.get("08_Fund_Transfer_Screen"),
+                5
         ));
 
-        // Page 8: Frontend UI Screenshots - Ledger, Receipts & PIN Change
+        // Page 6: Ledger, Receipts & PIN Change
         pageImages.add(buildScreenshotsPageWithReceipt(
                 "Frontend Development: Ledger, Receipts & PIN Security",
                 "Screen 9: Transaction Ledger & Mini-Statement", capturedScreens.get("09_Mini_Statement_Screen"),
                 "Screen 10: PIN Management", capturedScreens.get("10_PIN_Change_Screen"),
-                "Screen 11: Thermal Slip", capturedScreens.get("11_Thermal_Receipt_Slip")
+                "Screen 11: Thermal Slip", capturedScreens.get("11_Thermal_Receipt_Slip"),
+                6
         ));
+
+        // SECTION 2: DATABASE DESIGN
+        // Page 7: Database Design - Architecture & ER Diagram
+        pageImages.add(buildDatabaseDesignPage1(db));
+
+        // Page 8: Database Design - Schema Tables & ACID Verification
+        pageImages.add(buildDatabaseDesignPage2(db));
 
         // Page 9: Database Verification Queries & Test Logs
         pageImages.add(buildDatabaseVerificationPage(db));
@@ -307,7 +314,7 @@ public class PdfReportGenerator {
 
         g.setColor(new Color(125, 211, 252));
         g.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        String sub = "Comprehensive Implementation & Verification Report";
+        String sub = "Course Assignment Submission: Frontend/UI Development & Database Design";
         g.drawString(sub, (PAGE_WIDTH - g.getFontMetrics().stringWidth(sub)) / 2, 255);
 
         // Assigned Tasks Badges
@@ -400,7 +407,7 @@ public class PdfReportGenerator {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        drawHeaderFooter(g, "Section 2: Database Design", 2, 9);
+        drawHeaderFooter(g, "Section 2: Database Design (ERD)", 7, 9);
 
         int y = 100;
         g.setColor(new Color(15, 23, 42));
@@ -564,7 +571,7 @@ public class PdfReportGenerator {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        drawHeaderFooter(g, "Section 2: Database Schema & Data Dictionary", 3, 9);
+        drawHeaderFooter(g, "Section 2: Database Schema & Data Dictionary", 8, 9);
 
         int y = 100;
         g.setColor(new Color(15, 23, 42));
@@ -671,13 +678,13 @@ public class PdfReportGenerator {
         return y;
     }
 
-    private static BufferedImage buildScreenshotsPage(String pageTitle, String caption1, BufferedImage img1, String caption2, BufferedImage img2) {
+    private static BufferedImage buildScreenshotsPage(String pageTitle, String caption1, BufferedImage img1, String caption2, BufferedImage img2, int pageNum) {
         BufferedImage img = createBlankPage();
         Graphics2D g = img.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        drawHeaderFooter(g, "Section 1: Frontend / UI", 0, 9); // Page num overridden when writing
+        drawHeaderFooter(g, "Section 1: Frontend / UI Development", pageNum, 9);
 
         int y = 95;
         g.setColor(new Color(15, 23, 42));
@@ -716,13 +723,13 @@ public class PdfReportGenerator {
         return img;
     }
 
-    private static BufferedImage buildScreenshotsPageWithReceipt(String pageTitle, String cap1, BufferedImage img1, String cap2, BufferedImage img2, String cap3, BufferedImage img3) {
+    private static BufferedImage buildScreenshotsPageWithReceipt(String pageTitle, String cap1, BufferedImage img1, String cap2, BufferedImage img2, String cap3, BufferedImage img3, int pageNum) {
         BufferedImage img = createBlankPage();
         Graphics2D g = img.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        drawHeaderFooter(g, "Section 1: Frontend / UI", 0, 9);
+        drawHeaderFooter(g, "Section 1: Frontend / UI Development", pageNum, 9);
 
         int y = 95;
         g.setColor(new Color(15, 23, 42));
