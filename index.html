@@ -840,15 +840,18 @@
       <button class="tab-btn active" onclick="switchTab('simulator')">Interactive Simulator</button>
       <button class="tab-btn" onclick="switchTab('gallery')">Screen Gallery (11)</button>
       <button class="tab-btn" onclick="switchTab('database')">Database &amp; Ledger</button>
-      <button class="tab-btn" onclick="switchTab('pdf')">Executive PDF Report</button>
+      <button class="tab-btn" onclick="switchTab('pdf')">Submission PDF Reports (2)</button>
     </div>
 
     <div class="header-actions">
       <div class="action-badge">
         <span>Desktop GUI: Active</span>
       </div>
-      <a href="ATM_Transaction_Simulation_System_Report.pdf" class="btn-pdf" target="_blank" download>
-        <span>Download Report PDF</span>
+      <a href="ATM_Transaction_Simulation_System_Report.pdf" class="btn-pdf" target="_blank" download title="Download Frontend & UI Design Report">
+        <span>Frontend PDF</span>
+      </a>
+      <a href="ATM_Backend_And_Database_Integration_Report.pdf" class="btn-pdf" style="background: linear-gradient(135deg, #059669, #047857);" target="_blank" download title="Download Backend Implementation & Database Integration Report">
+        <span>Backend &amp; DB PDF</span>
       </a>
     </div>
   </header>
@@ -1509,21 +1512,33 @@
     </div>
 
     <!-- ==========================================
-         TAB 4: PDF REPORT VIEWER
+         TAB 4: SUBMISSION PDF REPORTS VIEWER
          ========================================== -->
     <div id="tab-pdf" class="tab-view">
-      <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+      <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
         <div>
-          <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 4px;">System Engineering &amp; Verification Report</h2>
-          <p style="color: var(--text-muted); font-size: 14px;">9-page formal technical specification and visual verification document generated in pure Java SE.</p>
+          <h2 id="pdfReportTitle" style="font-size: 24px; font-weight: 700; margin-bottom: 4px;">Backend Implementation &amp; Database Integration Report</h2>
+          <p id="pdfReportDesc" style="color: var(--text-muted); font-size: 14px;">9-page technical specification covering Architecture, SHA-256 Security, Greedy Denominations, 10/10 Test Suite, ER Diagrams, ACID Two-Phase Commits, and Live Database Dumps.</p>
         </div>
-        <a href="ATM_Transaction_Simulation_System_Report.pdf" target="_blank" download class="kiosk-btn btn-primary" style="text-decoration: none;">
-          Download PDF (1.8 MB)
-        </a>
+        <div style="display: flex; gap: 10px;">
+          <a id="pdfDownloadLink" href="ATM_Backend_And_Database_Integration_Report.pdf" target="_blank" download class="kiosk-btn btn-success" style="text-decoration: none;">
+            <span>Download Active PDF</span> &darr;
+          </a>
+        </div>
+      </div>
+
+      <!-- Report Selector Pills -->
+      <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+        <button id="btnPdfBackend" class="demo-chip-btn selected" onclick="selectPdfReport('backend')" style="font-size: 13px; padding: 10px 18px;">
+          Assignment 2: Backend &amp; DB Integration (9 Pages &bull; 1.28 MB)
+        </button>
+        <button id="btnPdfFrontend" class="demo-chip-btn" onclick="selectPdfReport('frontend')" style="font-size: 13px; padding: 10px 18px;">
+          Assignment 1: Frontend &amp; DB Design (11 Screens &bull; 1.85 MB)
+        </button>
       </div>
 
       <div class="pdf-embed-wrapper">
-        <iframe src="ATM_Transaction_Simulation_System_Report.pdf" class="pdf-embed-frame"></iframe>
+        <iframe id="pdfViewerFrame" src="ATM_Backend_And_Database_Integration_Report.pdf" class="pdf-embed-frame"></iframe>
       </div>
     </div>
 
@@ -1537,6 +1552,32 @@
 
       event.target.classList.add('active');
       document.getElementById('tab-' + tabId).classList.add('active');
+    }
+
+    // PDF Report Selector
+    function selectPdfReport(type) {
+      const frame = document.getElementById('pdfViewerFrame');
+      const title = document.getElementById('pdfReportTitle');
+      const desc = document.getElementById('pdfReportDesc');
+      const dlLink = document.getElementById('pdfDownloadLink');
+      const btnBackend = document.getElementById('btnPdfBackend');
+      const btnFrontend = document.getElementById('btnPdfFrontend');
+
+      if (type === 'backend') {
+        frame.src = 'ATM_Backend_And_Database_Integration_Report.pdf';
+        dlLink.href = 'ATM_Backend_And_Database_Integration_Report.pdf';
+        title.innerHTML = 'Backend Implementation &amp; Database Integration Report';
+        desc.innerHTML = '9-page technical specification covering Architecture, SHA-256 Security, Greedy Denominations, 10/10 Test Suite, ER Diagrams, ACID Two-Phase Commits, and Live Database Dumps.';
+        btnBackend.classList.add('selected');
+        btnFrontend.classList.remove('selected');
+      } else {
+        frame.src = 'ATM_Transaction_Simulation_System_Report.pdf';
+        dlLink.href = 'ATM_Transaction_Simulation_System_Report.pdf';
+        title.innerHTML = 'Frontend / UI Development &amp; Database Design Report';
+        desc.innerHTML = 'Formal visual documentation featuring high-resolution screenshots of all 11 terminal states, complete database schema DDL, ER diagrams, and system verification certificates.';
+        btnFrontend.classList.add('selected');
+        btnBackend.classList.remove('selected');
+      }
     }
 
     // Live Clock
