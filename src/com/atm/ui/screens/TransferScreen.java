@@ -52,6 +52,11 @@ public class TransferScreen extends JPanel implements ScreenManager.KeypadListen
     // Step 5: Error
     private JLabel errMessageLabel;
 
+    // Pending Transfer State
+    private String pendingTargetAccount;
+    private String pendingTargetDisplay;
+    private BigDecimal pendingAmount;
+
     public TransferScreen(ScreenManager screenManager) {
         this.screenManager = screenManager;
         setLayout(new BorderLayout());
@@ -122,6 +127,14 @@ public class TransferScreen extends JPanel implements ScreenManager.KeypadListen
         beneficiaryCombo.setFont(UITheme.FONT_BODY);
         beneficiaryCombo.setBackground(new Color(26, 42, 74));
         beneficiaryCombo.setForeground(Color.WHITE);
+        beneficiaryCombo.setEditable(true);
+        if (beneficiaryCombo.getEditor() != null && beneficiaryCombo.getEditor().getEditorComponent() instanceof JTextField) {
+            JTextField tf = (JTextField) beneficiaryCombo.getEditor().getEditorComponent();
+            tf.setBackground(new Color(11, 20, 38));
+            tf.setForeground(UITheme.ACCENT_CYAN);
+            tf.setCaretColor(Color.WHITE);
+            tf.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
+        }
         formCard.add(destTitle);
         formCard.add(beneficiaryCombo);
 
@@ -448,10 +461,49 @@ public class TransferScreen extends JPanel implements ScreenManager.KeypadListen
         AtmSession session = screenManager.getSession();
         if (session == null) return;
 
-        String selected = (String) beneficiaryCombo.getSelectedItem();
-        if (selected == null || !selected.contains("[")) {
-            feedbackLabel.setText("⚠ Please select a valid destination beneficiary.");
+        Object item = beneficiaryCombo.getEditor() != null ? beneficiaryCombo.getEditor().getItem() : beneficiaryCombo.getSelectedItem();
+        String selected = item != null ? item.toString().trim() : "";
+        if (selected.isEmpty()) {
+            feedbackLabel.setText("⚠ Please select or enter a valid destination beneficiary account.");
             feedbackLabel.setForeground(UITheme.WARNING_YELLOW);
+            return;
+        }
+
+        String targetAcc;
+        if (selected.contains("[") && selected.contains("]")) {
+            targetAcc = selected.substring(selected.indexOf("[") + 1, selected.indexOf("]")).trim();
+        } else {
+            targetAcc = selected.trim();
+        }
+
+        // Validate destination account in database
+        Account destAcc = DatabaseManager.getInstance().getAccount(targetAcc);
+        if (destAcc == null) {
+            // Case-insensitive fallback check
+            for (Account a : DatabaseManager.getInstance().getAllAccounts()) {
+                if (a.getAccountNumber().equalsIgnoreCase(targetAcc)) {
+                    destAcc = a;
+                    targetAcc = a.getAccountNumber();
+                    break;
+                }
+            }
+        }
+
+        if (destAcc == null) {
+            feedbackLabel.setText("⚠ Account '" + targetAcc + "' not found in banking system.");
+            feedbackLabel.setForeground(UITheme.WARNING_YELLOW);
+            return;
+        }
+
+        if (session.getAccount().getAccountNumber().equalsIgnoreCase(destAcc.getAccountNumber())) {
+            feedbackLabel.setText("⚠ Cannot transfer funds to your own source account.");
+            feedbackLabel.setForeground(UITheme.WARNING_YELLOW);
+            return;
+        }
+
+        if (!"ACTIVE".equalsIgnoreCase(destAcc.getStatus())) {
+            feedbackLabel.setText("⚠ Destination account is not active (Status: " + destAcc.getStatus() + ").");
+            feedbackLabel.setForeground(UITheme.DANGER_RED);
             return;
         }
 
@@ -478,9 +530,17 @@ public class TransferScreen extends JPanel implements ScreenManager.KeypadListen
             return;
         }
 
+        Customer recipientCust = DatabaseManager.getInstance().getCustomer(destAcc.getCustomerId());
+        String recipientName = recipientCust != null ? recipientCust.getFullName() : "Account Holder";
+        String displayRecipient = destAcc.getAccountNumber() + " (" + recipientName + " • " + destAcc.getAccountType() + ")";
+
+        this.pendingTargetAccount = targetAcc;
+        this.pendingTargetDisplay = displayRecipient;
+        this.pendingAmount = amount;
+
         // Set Confirmation Data
         confFromLabel.setText(session.getAccount().getAccountNumber() + " (" + session.getCustomer().getFullName() + ")");
-        confToLabel.setText(selected);
+        confToLabel.setText(displayRecipient);
         confAmountLabel.setText(UITheme.formatCurrency(amount));
         BigDecimal rem = session.getAccount().getBalance().subtract(amount);
         confRemainingLabel.setText(UITheme.formatCurrency(rem));
@@ -490,21 +550,16 @@ public class TransferScreen extends JPanel implements ScreenManager.KeypadListen
 
     private void executeTransfer() {
         AtmSession session = screenManager.getSession();
-        if (session == null) return;
-
-        String selected = (String) beneficiaryCombo.getSelectedItem();
-        if (selected == null) return;
-        String targetAcc = selected.substring(selected.indexOf("[") + 1, selected.indexOf("]"));
-        BigDecimal amount = new BigDecimal(amountField.getText().trim().replace("$", ""));
+        if (session == null || pendingTargetAccount == null || pendingAmount == null) return;
 
         setStep(ScreenState.PROCESSING);
 
         Timer timer = new Timer(500, e -> {
             ((Timer) e.getSource()).stop();
-            AtmService.OperationResult<BigDecimal> result = screenManager.getAtmService().transfer(session, targetAcc, amount);
+            AtmService.OperationResult<BigDecimal> result = screenManager.getAtmService().transfer(session, pendingTargetAccount, pendingAmount);
             if (result.isSuccess()) {
-                succAmountLabel.setText(UITheme.formatCurrency(amount));
-                succRecipientLabel.setText(selected);
+                succAmountLabel.setText(UITheme.formatCurrency(pendingAmount));
+                succRecipientLabel.setText(pendingTargetDisplay);
                 succNewBalLabel.setText(UITheme.formatCurrency(result.getData()));
                 setStep(ScreenState.SUCCESS);
             } else {
