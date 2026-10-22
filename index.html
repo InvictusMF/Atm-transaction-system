@@ -699,63 +699,6 @@
     }
 
     /* ========================================================
-       GALLERY VIEW
-       ======================================================== */
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 24px;
-    }
-
-    .gallery-card {
-      background: var(--bg-kiosk);
-      border: 1px solid var(--border-card);
-      border-radius: 16px;
-      overflow: hidden;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .gallery-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5);
-      border-color: var(--primary);
-    }
-
-    .gallery-img {
-      width: 100%;
-      height: auto;
-      display: block;
-      border-bottom: 1px solid var(--border-card);
-      background: #030712;
-    }
-
-    .gallery-info {
-      padding: 18px;
-    }
-
-    .gallery-badge {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--accent-cyan);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 6px;
-    }
-
-    .gallery-title {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 6px;
-      color: var(--text-white);
-    }
-
-    .gallery-desc {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-
-    /* ========================================================
        DATABASE VIEW
        ======================================================== */
     .db-section {
@@ -825,7 +768,6 @@
     <!-- Navigation Tabs -->
     <div class="nav-tabs">
       <button class="tab-btn active" onclick="switchTab('simulator')">Interactive Simulator</button>
-      <button class="tab-btn" onclick="switchTab('gallery')">Screen Gallery (11)</button>
       <button class="tab-btn" onclick="switchTab('database')">Database &amp; Ledger</button>
     </div>
 
@@ -1484,118 +1426,7 @@
     </div>
 
     <!-- ==========================================
-         TAB 2: HIGH-RESOLUTION SCREEN GALLERY
-         ========================================== -->
-    <div id="tab-gallery" class="tab-view">
-      <div style="margin-bottom: 24px;">
-        <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 6px;">Official ATM Kiosk UI Screens</h2>
-        <p style="color: var(--text-muted); font-size: 14px;">High-resolution snapshots of the ATM terminal interface across all 11 user journeys.</p>
-      </div>
-
-      <div class="gallery-grid">
-        <div class="gallery-card">
-          <img src="screenshots/01_Welcome_Screen.png" class="gallery-img" alt="Welcome Screen">
-          <div class="gallery-info">
-            <div class="gallery-badge">Screen 01</div>
-            <div class="gallery-title">Card Insertion &amp; Demo Selector</div>
-            <div class="gallery-desc">Dynamic debit card visual with chip simulation, manual card entry, and quick demo profile selectors.</div>
-          </div>
-        </div>
-
-        <div class="gallery-card">
-          <img src="screenshots/02_PIN_Entry_Screen.png" class="gallery-img" alt="PIN Entry Screen">
-          <div class="gallery-info">
-            <div class="gallery-badge">Screen 02</div>
-            <div class="gallery-title">Secure 4-Digit PIN Authentication</div>
-            <div class="gallery-desc">Glow-indicator 4-digit security boxes, attempt counter warning, and card status badge.</div>
-          </div>
-        </div>
-
-        <div class="gallery-card">
-          <img src="screenshots/03_Main_Menu_Screen.png" class="gallery-img" alt="Main Menu Screen">
-          <div class="gallery-info">
-            <div class="gallery-badge">Screen 03</div>
-            <div class="gallery-title">Transaction Navigation Dashboard</div>
-            <div class="gallery-desc">Account overview with live balance, daily limit, and 8 color-accented action tiles with keypad shortcuts.</div>
-          </div>
-        </div>
-
-        <div class="gallery-card">
-          <img src="screenshots/04_Balance_Inquiry_Screen.png" class="gallery-img" alt="Balance Inquiry Screen">
-          <div class="gallery-info">
-            <div class="gallery-badge">Screen 04</div>
-            <div class="gallery-title">Official Account Balance</div>
-            <div class="gallery-desc">Audited statement view with daily withdrawal limit, status pill, and direct withdrawal shortcuts.</div>
-          </div>
-        </div>
-
-        <div class="gallery-card">
-          <img src="screenshots/05_Fast_Cash_Screen.png" class="gallery-img" alt="Fast Cash Screen">
-          <div class="gallery-info">
-            <div class="gallery-badge">Screen 05</div>
-            <div class="gallery-title">Fast Cash 1-Touch Presets</div>
-            <div class="gallery-desc">Preset cash denominations ($20 to $500) with explicit note breakdowns and confirmation state.</div>
-          </div>
-        </div>
-
-        <div class="gallery-card">
-          <img src="screenshots/06_Cash_Withdrawal_Screen.png" class="gallery-img" alt="Cash Withdrawal Screen">
-          <div class="gallery-info">
-            <div class="gallery-badge">Screen 06</div>
-            <div class="gallery-title">Multi-Step Cash Withdrawal</div>
-            <div class="gallery-desc">Custom withdrawal input, real-time banknote optimization breakdown, $0 fee review, and dispense state.</div>
-          </div>
-        </div>
-
-        <div class="gallery-card">
-          <img src="screenshots/07_Cash_Deposit_Screen.png" class="gallery-img" alt="Cash Deposit Screen">
-          <div class="gallery-info">
-            <div class="gallery-badge">Screen 07</div>
-            <div class="gallery-title">Banknote Deposit Hopper</div>
-            <div class="gallery-desc">Auto-totaling note hopper for $100, $50, $20, $10 bills with immediate account balance credit.</div>
-          </div>
-        </div>
-
-        <div class="gallery-card">
-          <img src="screenshots/08_Fund_Transfer_Screen.png" class="gallery-img" alt="Fund Transfer Screen">
-          <div class="gallery-info">
-            <div class="gallery-badge">Screen 08</div>
-            <div class="gallery-title">Electronic Fund Transfer</div>
-            <div class="gallery-desc">Inter-account wire transfer with beneficiary selector, duplicate check, and instant ledger entry.</div>
-          </div>
-        </div>
-
-        <div class="gallery-card">
-          <img src="screenshots/09_Mini_Statement_Screen.png" class="gallery-img" alt="Mini Statement Screen">
-          <div class="gallery-info">
-            <div class="gallery-badge">Screen 09</div>
-            <div class="gallery-title">Audit Ledger &amp; Mini-Statement</div>
-            <div class="gallery-desc">Interactive transaction ledger with category filter pills, credit/debit badge coloring, and receipt print.</div>
-          </div>
-        </div>
-
-        <div class="gallery-card">
-          <img src="screenshots/10_PIN_Change_Screen.png" class="gallery-img" alt="PIN Change Screen">
-          <div class="gallery-info">
-            <div class="gallery-badge">Screen 10</div>
-            <div class="gallery-title">PIN Security Management</div>
-            <div class="gallery-desc">Live validation checklist verifying 4-digit length, matching confirmation, and distinct new code.</div>
-          </div>
-        </div>
-
-        <div class="gallery-card">
-          <img src="screenshots/11_Thermal_Receipt_Slip.png" class="gallery-img" alt="Thermal Receipt Slip">
-          <div class="gallery-info">
-            <div class="gallery-badge">Screen 11</div>
-            <div class="gallery-title">Thermal Paper Receipt Slip</div>
-            <div class="gallery-desc">Authentic thermal receipt with drop shadow, perforated zigzag top edge, audit security hash, and barcode.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==========================================
-         TAB 3: DATABASE & ARCHITECTURE
+         TAB 2: DATABASE & ARCHITECTURE
          ========================================== -->
     <div id="tab-database" class="tab-view">
       <div style="margin-bottom: 24px;">
