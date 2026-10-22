@@ -44,7 +44,7 @@ public class MiniStatementScreen extends JPanel implements ScreenManager.Refresh
         topPanel.setOpaque(false);
 
         JPanel header = UITheme.createScreenHeader(
-                "TRANSACTION HISTORY  •  AUDIT LEDGER",
+                "TRANSACTION HISTORY  •  ACCOUNT ACTIVITY",
                 "Account Statement & Activity",
                 "Chronological record of recent deposits, withdrawals, and wire transfers"
         );

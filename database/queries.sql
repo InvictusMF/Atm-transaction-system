@@ -1,14 +1,18 @@
 -- ============================================================================
--- ATM TRANSACTION SIMULATION SYSTEM - VERIFICATION & BUSINESS QUERIES
+-- APEX NATIONAL BANK - ATM TRANSACTION SIMULATION SYSTEM
+-- TARGET RDBMS: MySQL 8.0+
+-- DATABASE: atm_simulation - VERIFICATION & ANALYTICS QUERIES
 -- ============================================================================
+
+USE atm_simulation;
 
 -- Query 1: Verify Customer Portfolio & Linked Card Status
 SELECT 
     c.customer_id,
-    c.first_name || ' ' || c.last_name AS customer_name,
+    CONCAT(c.first_name, ' ', c.last_name) AS customer_name,
     a.account_number,
     a.account_type,
-    printf('$%.2f', a.balance) AS current_balance,
+    CONCAT('$', FORMAT(a.balance, 2)) AS current_balance,
     card.card_number,
     card.card_status,
     card.failed_pin_attempts
@@ -22,8 +26,8 @@ SELECT
     t.transaction_id,
     t.created_at,
     t.transaction_type,
-    printf('$%.2f', t.amount) AS amount,
-    printf('$%.2f', t.balance_after) AS balance_after,
+    CONCAT('$', FORMAT(t.amount, 2)) AS amount,
+    CONCAT('$', FORMAT(t.balance_after, 2)) AS balance_after,
     COALESCE(t.beneficiary_account, 'N/A') AS recipient,
     t.status,
     t.remarks
@@ -39,7 +43,7 @@ SELECT
     bills_50  AS "$50 Bills",
     bills_20  AS "$20 Bills",
     bills_10  AS "$10 Bills",
-    printf('$%.2f', total_cash_reserve) AS total_reserve,
+    CONCAT('$', FORMAT(total_cash_reserve, 2)) AS total_reserve,
     last_replenished
 FROM atm_cash_inventory;
 
@@ -48,7 +52,7 @@ SELECT
     atm_id,
     DATE(created_at) AS tx_date,
     COUNT(*) AS total_withdrawals,
-    printf('$%.2f', SUM(amount)) AS total_dispensed_amount
+    CONCAT('$', FORMAT(SUM(amount), 2)) AS total_dispensed_amount
 FROM transactions
 WHERE transaction_type = 'WITHDRAWAL' AND status = 'SUCCESS'
 GROUP BY atm_id, DATE(created_at);
@@ -59,6 +63,8 @@ SELECT
     card_number,
     action,
     details,
+    ip_or_terminal_id,
     timestamp
 FROM audit_logs
-ORDER BY timestamp DESC;
+ORDER BY timestamp DESC
+LIMIT 10;

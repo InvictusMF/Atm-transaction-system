@@ -46,6 +46,21 @@ public class Main {
             return;
         }
 
+        // Connection diagnostics & status banner
+        com.atm.db.DatabaseConfig.ConnectionTestResult connTest = com.atm.db.DatabaseConfig.testConnection();
+        System.out.println("=================================================");
+        System.out.println("  APEX BANK ATM TRANSACTION SIMULATION SYSTEM   ");
+        if (connTest.isSuccess()) {
+            System.out.println("  [STORAGE STATUS] Connected to live MySQL database");
+            System.out.println("  [TARGET] " + com.atm.db.DatabaseConfig.getSafeUrl());
+            System.out.println("  [USER]   " + com.atm.db.DatabaseConfig.getUser());
+        } else {
+            System.out.println("  [STORAGE STATUS] In-Memory Fallback Mode");
+            System.out.println("  [NOTICE]  MySQL is not connected (" + connTest.getMessage() + ")");
+            System.out.println("  [TIP]     Set environment variable ATM_DB_PASSWORD or configure database.properties");
+        }
+        System.out.println("=================================================");
+
         // Standard Interactive GUI Launch
         SwingUtilities.invokeLater(() -> {
             try {

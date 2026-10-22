@@ -77,6 +77,7 @@ public class AtmService {
             }
 
             card.resetFailedAttempts();
+            db.updateCardFailedAttempts(card.getCardNumber(), 0, "ACTIVE");
             Customer customer = db.getCustomer(account.getCustomerId());
 
             db.addAuditLog(cardNumber, "LOGIN_SUCCESS", "Authenticated successfully as " + card.getCardHolderName());
@@ -89,9 +90,11 @@ public class AtmService {
 
             if (card.getFailedPinAttempts() >= 3) {
                 card.setCardStatus("BLOCKED");
+                db.updateCardFailedAttempts(cardNumber, card.getFailedPinAttempts(), "BLOCKED");
                 db.addAuditLog(cardNumber, "CARD_BLOCKED", "Card permanently blocked after 3 consecutive invalid PIN entries");
                 return new AuthResult(false, "Incorrect PIN. Card has been BLOCKED for your security.", null, true);
             } else {
+                db.updateCardFailedAttempts(cardNumber, card.getFailedPinAttempts(), "ACTIVE");
                 db.addAuditLog(cardNumber, "PIN_FAILED", "Invalid PIN attempt. Remaining attempts: " + remaining);
                 return new AuthResult(false, "Incorrect PIN. " + remaining + " attempt(s) remaining.", null, false);
             }
@@ -100,6 +103,7 @@ public class AtmService {
 
     /**
      * Executes Cash Withdrawal with Denomination breakdown and ATM Cash Inventory verification.
+     * Transactional and atomic across account balance, cash inventory, ledger and audit log.
      */
     public OperationResult<Map<Integer, Integer>> withdraw(AtmSession session, int amount) {
         if (amount <= 0 || amount % 10 != 0) {
@@ -123,24 +127,33 @@ public class AtmService {
             return new OperationResult<>(false, "ATM cannot dispense the exact denomination notes. Please try another amount.", null);
         }
 
-        // Debit Account
-        account.debit(withdrawalAmount);
-
-        // Record Transaction
-        String txId = "TX-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        Transaction tx = new Transaction(
-                txId, account.getAccountNumber(), session.getCard().getCardNumber(),
-                "WITHDRAWAL", withdrawalAmount, account.getBalance(), null,
-                inventory.getAtmId(), "SUCCESS", "Cash Withdrawal dispensed", LocalDateTime.now()
+        // Execute persistent transactional withdrawal in database
+        boolean success = db.executeWithdrawal(
+                account.getAccountNumber(),
+                session.getCard().getCardNumber(),
+                amount,
+                dispensedBills,
+                inventory.getAtmId()
         );
-        db.addTransaction(tx);
-        db.addAuditLog(session.getCard().getCardNumber(), "WITHDRAW_SUCCESS", "Dispensed $" + amount);
+
+        if (!success) {
+            return new OperationResult<>(false, "Withdrawal failed. Insufficient funds or cash reserves.", null);
+        }
+
+        // Synchronize in-memory session account balance with database
+        Account refreshedAccount = db.getAccount(account.getAccountNumber());
+        if (refreshedAccount != null) {
+            account.setBalance(refreshedAccount.getBalance());
+        } else {
+            account.debit(withdrawalAmount);
+        }
 
         return new OperationResult<>(true, "Cash dispensed successfully.", dispensedBills);
     }
 
     /**
      * Executes Cash Deposit and updates Account balance & ATM hopper inventory.
+     * Transactional and atomic across account balance, cash inventory, ledger and audit log.
      */
     public OperationResult<BigDecimal> deposit(AtmSession session, int bills100, int bills50, int bills20, int bills10) {
         int totalDeposit = (bills100 * 100) + (bills50 * 50) + (bills20 * 20) + (bills10 * 10);
@@ -150,25 +163,34 @@ public class AtmService {
 
         BigDecimal depositAmount = BigDecimal.valueOf(totalDeposit);
         Account account = session.getAccount();
-        account.credit(depositAmount);
-
         CashInventory inventory = db.getCashInventory();
-        inventory.depositCash(bills100, bills50, bills20, bills10);
 
-        String txId = "TX-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        Transaction tx = new Transaction(
-                txId, account.getAccountNumber(), session.getCard().getCardNumber(),
-                "DEPOSIT", depositAmount, account.getBalance(), null,
-                inventory.getAtmId(), "SUCCESS", "Cash Deposit received", LocalDateTime.now()
+        // Execute persistent transactional deposit in database
+        boolean success = db.executeDeposit(
+                account.getAccountNumber(),
+                session.getCard().getCardNumber(),
+                bills100, bills50, bills20, bills10,
+                depositAmount,
+                inventory.getAtmId()
         );
-        db.addTransaction(tx);
-        db.addAuditLog(session.getCard().getCardNumber(), "DEPOSIT_SUCCESS", "Deposited $" + totalDeposit);
+
+        if (!success) {
+            return new OperationResult<>(false, "Deposit transaction failed. Could not persist to database.", account.getBalance());
+        }
+
+        // Synchronize in-memory session account balance with database
+        Account refreshedAccount = db.getAccount(account.getAccountNumber());
+        if (refreshedAccount != null) {
+            account.setBalance(refreshedAccount.getBalance());
+        } else {
+            account.credit(depositAmount);
+        }
 
         return new OperationResult<>(true, "Deposit successful.", account.getBalance());
     }
 
     /**
-     * Transfers funds to another account.
+     * Transfers funds to another account with ACID guarantees.
      */
     public OperationResult<BigDecimal> transfer(AtmSession session, String beneficiaryAccount, BigDecimal amount) {
         if (beneficiaryAccount == null || beneficiaryAccount.trim().isEmpty()) {
@@ -197,11 +219,19 @@ public class AtmService {
             return new OperationResult<>(false, "Transfer failed due to insufficient funds or inactive status.", null);
         }
 
+        // Synchronize source account balance with database
+        Account refreshedAccount = db.getAccount(session.getAccount().getAccountNumber());
+        if (refreshedAccount != null) {
+            session.getAccount().setBalance(refreshedAccount.getBalance());
+        } else {
+            session.getAccount().debit(amount);
+        }
+
         return new OperationResult<>(true, "Successfully transferred $" + amount + " to " + beneficiaryAccount, session.getAccount().getBalance());
     }
 
     /**
-     * Changes card PIN securely with validation.
+     * Changes card PIN securely with validation and persistent database update.
      */
     public OperationResult<Boolean> changePin(AtmSession session, String oldPin, String newPin, String confirmPin) {
         if (!newPin.equals(confirmPin)) {
@@ -218,7 +248,9 @@ public class AtmService {
             return new OperationResult<>(false, "Current PIN is incorrect.", false);
         }
 
-        card.setPinHash(DatabaseManager.hashPin(newPin));
+        String hashedNew = DatabaseManager.hashPin(newPin);
+        card.setPinHash(hashedNew);
+        db.updateCardPin(card.getCardNumber(), hashedNew);
         db.addAuditLog(card.getCardNumber(), "PIN_CHANGE_SUCCESS", "PIN updated successfully");
 
         // Record non-financial audit transaction

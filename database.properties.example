@@ -1,0 +1,13 @@
+# ============================================================================
+# APEX NATIONAL BANK ATM SIMULATION SYSTEM - DATABASE CONFIGURATION
+# ============================================================================
+# Instructions:
+# 1. Copy this file and rename it to 'database.properties' in this same folder.
+# 2. Update 'db.user' and 'db.password' with your local MySQL credentials.
+# 3. Alternatively, you can set the environment variables:
+#    ATM_DB_URL, ATM_DB_USER, ATM_DB_PASSWORD
+# ============================================================================
+
+db.url=jdbc:mysql://localhost:3306/atm_simulation?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
+db.user=root
+db.password=your_mysql_password_here

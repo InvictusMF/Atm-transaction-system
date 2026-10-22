@@ -107,7 +107,7 @@ public class MainMenuScreen extends JPanel implements ScreenManager.KeypadListen
 
         // Row 3: Balance Inquiry & Mini Statement
         gridPanel.add(createMenuButton("5. Balance Inquiry", "View detailed balance & account standing", new Color(79, 70, 229), e -> screenManager.showScreen("BALANCE")));
-        gridPanel.add(createMenuButton("6. Mini Statement", "Recent transactions ledger & print receipt", new Color(147, 51, 234), e -> screenManager.showScreen("MINI_STATEMENT")));
+        gridPanel.add(createMenuButton("6. Mini Statement", "Recent transactions & print receipt", new Color(147, 51, 234), e -> screenManager.showScreen("MINI_STATEMENT")));
 
         // Row 4: Change PIN & Logout
         gridPanel.add(createMenuButton("7. Change PIN", "Update your confidential 4-digit code", new Color(71, 85, 105), e -> screenManager.showScreen("PIN_CHANGE")));

@@ -5,3 +5,9 @@ bin/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Database Credentials & Local Configuration
+database.properties
+db.properties
+local.properties
+*.local

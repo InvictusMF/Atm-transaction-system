@@ -1,18 +1,14 @@
 package com.atm.ui;
 
-import com.atm.db.DatabaseManager;
-import com.atm.model.*;
 import com.atm.service.AtmSession;
 import com.atm.ui.screens.*;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
 
 public class AtmKioskFrame extends JFrame {
     private final ScreenManager screenManager;
@@ -165,16 +161,10 @@ public class AtmKioskFrame extends JFrame {
         clockLabel = new JLabel("2026-09-21 00:00:00", SwingConstants.RIGHT);
         clockLabel.setFont(UITheme.FONT_MONO);
         clockLabel.setForeground(UITheme.TEXT_MUTED);
-        clockLabel.setPreferredSize(new Dimension(150, 30));
+        clockLabel.setPreferredSize(new Dimension(180, 30));
         clockLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 6));
 
-        JButton dbViewBtn = UITheme.createModernButton("View Database", new Color(51, 65, 85), Color.WHITE);
-        dbViewBtn.setFont(UITheme.FONT_BODY_BOLD);
-        dbViewBtn.setPreferredSize(new Dimension(135, 34));
-        dbViewBtn.addActionListener(e -> showDatabaseViewerDialog());
-
         utilPanel.add(clockLabel);
-        utilPanel.add(dbViewBtn);
         marquee.add(utilPanel, BorderLayout.EAST);
 
         return marquee;
@@ -334,80 +324,6 @@ public class AtmKioskFrame extends JFrame {
             cardSlotLed.setForeground(UITheme.SUCCESS_GREEN);
         }
         requestFocusInWindow();
-    }
-
-    /**
-     * Opens an interactive multi-tab database viewer dialog showing live relational tables.
-     */
-    public void showDatabaseViewerDialog() {
-        JDialog dialog = new JDialog(this, "Live Relational Database Tables Inspector", true);
-        dialog.setSize(900, 550);
-        dialog.setLocationRelativeTo(this);
-
-        JTabbedPane tabs = new JTabbedPane();
-        DatabaseManager db = DatabaseManager.getInstance();
-
-        // 1. Customers Tab
-        tabs.addTab("customers", createTableScroll(
-                new String[]{"ID", "First Name", "Last Name", "Email", "Phone", "Address", "Created At"},
-                db.getAllCustomers().stream().map(c -> new Object[]{
-                        c.getCustomerId(), c.getFirstName(), c.getLastName(), c.getEmail(), c.getPhone(), c.getAddress(), c.getCreatedAt()
-                }).toArray(Object[][]::new)
-        ));
-
-        // 2. Accounts Tab
-        tabs.addTab("accounts", createTableScroll(
-                new String[]{"Account Number", "Customer ID", "Type", "Balance", "Currency", "Status", "Daily Limit"},
-                db.getAllAccounts().stream().map(a -> new Object[]{
-                        a.getAccountNumber(), a.getCustomerId(), a.getAccountType(), "$" + a.getBalance(), a.getCurrency(), a.getStatus(), "$" + a.getDailyWithdrawalLimit()
-                }).toArray(Object[][]::new)
-        ));
-
-        // 3. ATM Cards Tab
-        tabs.addTab("atm_cards", createTableScroll(
-                new String[]{"Card Number", "Account Number", "Cardholder", "PIN Hash (SHA-256)", "Expiry", "CVV", "Status", "Fails"},
-                db.getAllCards().stream().map(c -> new Object[]{
-                        c.getCardNumber(), c.getAccountNumber(), c.getCardHolderName(), c.getPinHash().substring(0, 16) + "...", c.getExpiryDate(), c.getCvv(), c.getCardStatus(), c.getFailedPinAttempts()
-                }).toArray(Object[][]::new)
-        ));
-
-        // 4. Transactions Tab
-        tabs.addTab("transactions", createTableScroll(
-                new String[]{"Tx ID", "Account", "Type", "Amount", "Balance After", "Status", "Timestamp"},
-                db.getAllTransactions().stream().map(t -> new Object[]{
-                        t.getTransactionId(), t.getAccountNumber(), t.getTransactionType(), "$" + t.getAmount(), "$" + t.getBalanceAfter(), t.getStatus(), t.getFormattedDate()
-                }).toArray(Object[][]::new)
-        ));
-
-        // 5. Cash Inventory Tab
-        CashInventory inv = db.getCashInventory();
-        tabs.addTab("atm_cash_inventory", createTableScroll(
-                new String[]{"Terminal ID", "$100 Bills", "$50 Bills", "$20 Bills", "$10 Bills", "Total Reserve", "Last Serviced"},
-                new Object[][]{{
-                        inv.getAtmId(), inv.getBills100(), inv.getBills50(), inv.getBills20(), inv.getBills10(), "$" + inv.getTotalCashReserve(), inv.getLastReplenished()
-                }}
-        ));
-
-        // 6. Audit Logs Tab
-        tabs.addTab("audit_logs", createTableScroll(
-                new String[]{"Log ID", "Card", "Action", "Details", "Terminal", "Timestamp"},
-                db.getAllAuditLogs().stream().map(l -> new Object[]{
-                        l.getLogId(), l.getCardNumber(), l.getAction(), l.getDetails(), l.getIpOrTerminalId(), l.getFormattedTimestamp()
-                }).toArray(Object[][]::new)
-        ));
-
-        dialog.setContentPane(tabs);
-        dialog.setVisible(true);
-    }
-
-    private JScrollPane createTableScroll(String[] columns, Object[][] data) {
-        DefaultTableModel model = new DefaultTableModel(data, columns) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
-        JTable table = new JTable(model);
-        table.setFont(UITheme.FONT_MONO);
-        table.setRowHeight(24);
-        return new JScrollPane(table);
     }
 
     public ScreenManager getScreenManager() {

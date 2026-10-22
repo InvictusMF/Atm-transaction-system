@@ -765,15 +765,9 @@
       </div>
     </div>
 
-    <!-- Navigation Tabs -->
-    <div class="nav-tabs">
-      <button class="tab-btn active" onclick="switchTab('simulator')">Interactive Simulator</button>
-      <button class="tab-btn" onclick="switchTab('database')">Database &amp; Ledger</button>
-    </div>
-
     <div class="header-actions">
       <div class="action-badge">
-        <span>ATM System Online</span>
+        <span>ATM Terminal #01 Online</span>
       </div>
     </div>
   </header>
@@ -927,7 +921,7 @@
                   <div class="action-btn" onclick="showScreen('statement')">
                     <div>
                       <div class="action-title">6. Mini Statement</div>
-                      <div class="action-desc">Transaction audit ledger &amp; thermal receipt</div>
+                      <div class="action-desc">Recent transactions &amp; thermal receipt</div>
                     </div>
                     <div class="action-chevron">&rsaquo;</div>
                   </div>
@@ -1108,7 +1102,7 @@
               <!-- STATE 8: MINI STATEMENT SCREEN -->
               <div id="screen-statement" class="screen-state">
                 <div class="screen-header" style="margin-bottom: 10px;">
-                  <div class="screen-breadcrumb">Transaction History &bull; Audit Ledger</div>
+                  <div class="screen-breadcrumb">Transaction History &bull; Recent Activity</div>
                   <div class="screen-title">Account Statement &amp; Activity</div>
                   <div class="screen-subtitle">Chronological record of recent deposits, withdrawals, and wire transfers</div>
                 </div>
@@ -1391,11 +1385,11 @@
           <div class="meta-list">
             <div class="meta-item">
               <span class="meta-label">System Architecture:</span>
-              <span class="meta-val">Java SE 21 + SQLite</span>
+              <span class="meta-val">Java SE 21 + MySQL 8.0</span>
             </div>
             <div class="meta-item">
-              <span class="meta-label">ACID Compliance:</span>
-              <span class="meta-val" style="color: var(--success);">WAL Mode Active</span>
+              <span class="meta-label">Storage Engine:</span>
+              <span class="meta-val" style="color: var(--success);">MySQL (InnoDB)</span>
             </div>
             <div class="meta-item">
               <span class="meta-label">Active Session:</span>
@@ -1424,89 +1418,9 @@
 
       </div>
     </div>
-
-    <!-- ==========================================
-         TAB 2: DATABASE & ARCHITECTURE
-         ========================================== -->
-    <div id="tab-database" class="tab-view">
-      <div style="margin-bottom: 24px;">
-        <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 6px;">Relational Database &amp; Ledger Architecture</h2>
-        <p style="color: var(--text-muted); font-size: 14px;">Normalized relational tables operating under ACID transactional guarantees in SQLite with WAL mode.</p>
-      </div>
-
-      <div class="db-section">
-        <div class="db-table-title">1. ACCOUNTS &amp; CUSTOMERS</div>
-        <div class="db-table-responsive">
-          <table class="db-table">
-            <thead>
-              <tr><th>Account Number</th><th>Customer Name</th><th>Type</th><th>Available Balance</th><th>Daily Limit</th><th>Status</th></tr>
-            </thead>
-            <tbody id="dbAccountsTbody">
-              <tr><td>ACC-1001-8842</td><td>Alexander Vance</td><td>SAVINGS</td><td style="color: var(--success);">$5,420.50</td><td>$2,000.00</td><td>ACTIVE</td></tr>
-              <tr><td>ACC-1001-8843</td><td>Alexander Vance</td><td>CHECKING</td><td style="color: var(--success);">$18,750.00</td><td>$5,000.00</td><td>ACTIVE</td></tr>
-              <tr><td>ACC-2002-4419</td><td>Sophia Williams</td><td>CHECKING</td><td style="color: var(--success);">$3,150.00</td><td>$1,500.00</td><td>ACTIVE</td></tr>
-              <tr><td>ACC-2002-9951</td><td>Sarah Connor</td><td>SAVINGS</td><td style="color: var(--success);">$12,850.00</td><td>$3,000.00</td><td>ACTIVE</td></tr>
-              <tr><td>ACC-3003-9120</td><td>David Miller</td><td>SAVINGS</td><td style="color: var(--success);">$820.00</td><td>$1,000.00</td><td>ACTIVE</td></tr>
-              <tr><td>ACC-3003-7712</td><td>Bruce Wayne</td><td>CHECKING</td><td style="color: var(--success);">$95,000.00</td><td>$10,000.00</td><td>ACTIVE</td></tr>
-              <tr><td>ACC-4004-7731</td><td>Emma Watson</td><td>CHECKING</td><td style="color: var(--success);">$12,400.00</td><td>$3,000.00</td><td>ACTIVE</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="db-section">
-        <div class="db-table-title">2. ATM CARDS</div>
-        <div class="db-table-responsive">
-          <table class="db-table">
-            <thead>
-              <tr><th>Card Number</th><th>Account Number</th><th>Cardholder Name</th><th>PIN Hash (SHA-256)</th><th>Status</th><th>Failed Attempts</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>4532 **** **** 4455</td><td>ACC-1001-8842</td><td>Alexander Vance</td><td>03ac674216f3e15c... (1234)</td><td>ACTIVE</td><td>0 / 3</td></tr>
-              <tr><td>5120 **** **** 7788</td><td>ACC-2002-9951</td><td>Sarah Connor</td><td>b512d7b68631c518... (4321)</td><td>ACTIVE</td><td>0 / 3</td></tr>
-              <tr><td>6011 **** **** 5544</td><td>ACC-3003-7712</td><td>Bruce Wayne</td><td>15e2b0d3c33891eb... (9999)</td><td>ACTIVE</td><td>0 / 3</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="db-section">
-        <div class="db-table-title">3. ATM CASH INVENTORY (HARDWARE VAULT)</div>
-        <div class="db-table-responsive">
-          <table class="db-table">
-            <thead>
-              <tr><th>Terminal ID</th><th>$100 Bills</th><th>$50 Bills</th><th>$20 Bills</th><th>$10 Bills</th><th>Total Vault Reserve</th><th>Last Audit</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>ATM-TERMINAL-01</td><td>100 notes ($10k)</td><td>80 notes ($4k)</td><td>100 notes ($2k)</td><td>50 notes ($500)</td><td style="color: var(--accent-cyan); font-weight: 700;">$16,500.00</td><td>2026-09-26 15:00:00</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
   </main>
 
   <script>
-    // Tab Switching
-    function switchTab(tabId, btn) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-view').forEach(view => view.classList.remove('active'));
-
-      const targetBtn = btn || (typeof event !== 'undefined' && event && event.target ? (event.target.closest('.tab-btn') || event.target) : null);
-      if (targetBtn && targetBtn.classList) {
-        targetBtn.classList.add('active');
-      } else {
-        const navBtns = document.querySelectorAll('.tab-btn');
-        navBtns.forEach(b => {
-          if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(tabId)) {
-            b.classList.add('active');
-          }
-        });
-      }
-      const targetView = document.getElementById('tab-' + tabId);
-      if (targetView) targetView.classList.add('active');
-    }
-
     // Live Clock
     setInterval(() => {
       const now = new Date();
@@ -1544,24 +1458,6 @@
       { id: 'TX-77192B', date: '2026-09-26 14:32:10', type: 'WITHDRAWAL', amount: -100.00, balAfter: 5320.50, status: 'SUCCESS' },
       { id: 'TX-66104C', date: '2026-09-21 09:15:00', type: 'FAST_CASH', amount: -200.00, balAfter: 5420.50, status: 'SUCCESS' }
     ];
-
-    function renderDbAccounts() {
-      const tbody = document.getElementById('dbAccountsTbody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-      systemAccounts.forEach(acc => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${acc.num}</td>
-          <td>${acc.name}</td>
-          <td>${acc.type}</td>
-          <td style="color: var(--success); font-weight: 700;">$${acc.bal.toFixed(2)}</td>
-          <td>$${acc.limit.toFixed(2)}</td>
-          <td><span style="color: var(--success); font-weight: 600;">${acc.status}</span></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
 
     function selectDemoAccount(name, cardNum, pin, balance) {
       document.querySelectorAll('.demo-chip-btn').forEach(b => b.classList.remove('selected'));
@@ -2056,13 +1952,11 @@
       currentAccount.balance = 5420.50;
       const sys = systemAccounts.find(a => a.num === 'ACC-1001-8842');
       if (sys) sys.bal = 5420.50;
-      renderDbAccounts();
       ejectCard();
     }
 
     // Initial load
     updateWithdrawDisplay();
-    renderDbAccounts();
   </script>
 </body>
 </html>
