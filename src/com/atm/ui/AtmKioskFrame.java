@@ -2,7 +2,6 @@ package com.atm.ui;
 
 import com.atm.db.DatabaseManager;
 import com.atm.model.*;
-import com.atm.pdf.PdfReportGenerator;
 import com.atm.service.AtmSession;
 import com.atm.ui.screens.*;
 
@@ -174,14 +173,8 @@ public class AtmKioskFrame extends JFrame {
         dbViewBtn.setPreferredSize(new Dimension(135, 34));
         dbViewBtn.addActionListener(e -> showDatabaseViewerDialog());
 
-        JButton exportPdfBtn = UITheme.createModernButton("Generate PDF Report", UITheme.ACCENT_BLUE, Color.WHITE);
-        exportPdfBtn.setFont(UITheme.FONT_BODY_BOLD);
-        exportPdfBtn.setPreferredSize(new Dimension(175, 34));
-        exportPdfBtn.addActionListener(e -> generateReportPdf());
-
         utilPanel.add(clockLabel);
         utilPanel.add(dbViewBtn);
-        utilPanel.add(exportPdfBtn);
         marquee.add(utilPanel, BorderLayout.EAST);
 
         return marquee;
@@ -415,25 +408,6 @@ public class AtmKioskFrame extends JFrame {
         table.setFont(UITheme.FONT_MONO);
         table.setRowHeight(24);
         return new JScrollPane(table);
-    }
-
-    public void generateReportPdf() {
-        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        try {
-            String outputPath = PdfReportGenerator.generateSystemReport(this);
-            setCursor(Cursor.getDefaultCursor());
-            JOptionPane.showMessageDialog(this,
-                    "Successfully generated single PDF report!\n\nLocation:\n" + outputPath,
-                    "PDF GENERATION COMPLETE",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            setCursor(Cursor.getDefaultCursor());
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                    "Error generating PDF report: " + ex.getMessage(),
-                    "PDF GENERATION ERROR",
-                    JOptionPane.ERROR_MESSAGE);
-        }
     }
 
     public ScreenManager getScreenManager() {
