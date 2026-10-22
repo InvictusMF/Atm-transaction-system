@@ -15,7 +15,7 @@ import java.awt.*;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class TransferScreen extends JPanel implements ScreenManager.RefreshableScreen {
+public class TransferScreen extends JPanel implements ScreenManager.KeypadListener, ScreenManager.RefreshableScreen {
     private enum ScreenState {
         DETAILS,
         CONFIRMATION,
@@ -522,6 +522,32 @@ public class TransferScreen extends JPanel implements ScreenManager.RefreshableS
         List<Transaction> txs = screenManager.getAtmService().getMiniStatement(session, 1);
         if (!txs.isEmpty()) {
             new ReceiptPopup(screenManager.getFrame(), session, txs.get(0), "ATM Receipt - Fund Transfer").setVisible(true);
+        }
+    }
+
+    @Override public void onKeyPressed(String key) {
+        if (currentState == ScreenState.DETAILS && key.matches("\\d") && amountField.getText().length() < 8) {
+            amountField.setText(amountField.getText() + key);
+        }
+    }
+    @Override public void onClear() {
+        if (currentState == ScreenState.DETAILS) {
+            amountField.setText("");
+        }
+    }
+    @Override public void onCancel() {
+        if (currentState == ScreenState.CONFIRMATION) {
+            setStep(ScreenState.DETAILS);
+        } else {
+            amountField.setText("");
+            screenManager.showScreen("MAIN_MENU");
+        }
+    }
+    @Override public void onEnter() {
+        if (currentState == ScreenState.DETAILS) {
+            proceedToConfirmation();
+        } else if (currentState == ScreenState.CONFIRMATION) {
+            executeTransfer();
         }
     }
 

@@ -66,9 +66,18 @@ public class AtmService {
         String hashedAttempt = DatabaseManager.hashPin(pin);
         if (card.getPinHash().equals(hashedAttempt)) {
             // Success
-            card.resetFailedAttempts();
             Account account = db.getAccount(card.getAccountNumber());
-            Customer customer = db.getCustomer(account != null ? account.getCustomerId() : 0);
+            if (account == null) {
+                db.addAuditLog(cardNumber, "AUTH_FAILED", "Linked account record missing");
+                return new AuthResult(false, "Linked bank account was not found in the system.", null, false);
+            }
+            if ("CLOSED".equalsIgnoreCase(account.getStatus())) {
+                db.addAuditLog(cardNumber, "AUTH_REJECTED", "Attempt to access closed account");
+                return new AuthResult(false, "This bank account is CLOSED. Please contact customer service.", null, false);
+            }
+
+            card.resetFailedAttempts();
+            Customer customer = db.getCustomer(account.getCustomerId());
 
             db.addAuditLog(cardNumber, "LOGIN_SUCCESS", "Authenticated successfully as " + card.getCardHolderName());
             AtmSession session = new AtmSession(customer, account, card);

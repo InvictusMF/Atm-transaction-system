@@ -11,7 +11,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 
-public class PinChangeScreen extends JPanel implements ScreenManager.RefreshableScreen {
+public class PinChangeScreen extends JPanel implements ScreenManager.KeypadListener, ScreenManager.RefreshableScreen {
     private enum ScreenState {
         FORM,
         PROCESSING,
@@ -388,6 +388,18 @@ public class PinChangeScreen extends JPanel implements ScreenManager.Refreshable
         });
         timer.setRepeats(false);
         timer.start();
+    }
+
+    @Override public void onKeyPressed(String key) {}
+    @Override public void onClear() { clearInputs(); }
+    @Override public void onCancel() {
+        clearInputs();
+        screenManager.showScreen("MAIN_MENU");
+    }
+    @Override public void onEnter() {
+        if (currentState == ScreenState.FORM) {
+            executePinChange();
+        }
     }
 
     @Override

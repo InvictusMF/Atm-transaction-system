@@ -447,9 +447,15 @@ public class WithdrawScreen extends JPanel implements ScreenManager.KeypadListen
 
     @Override
     public void onKeyPressed(String key) {
-        if (currentState == ScreenState.INPUT && key.matches("\\d") && enteredAmount.length() < 6) {
-            enteredAmount.append(key);
-            updateAmountField();
+        if (currentState == ScreenState.INPUT && key.matches("\\d")) {
+            if (enteredAmount.length() == 1 && enteredAmount.charAt(0) == '0') {
+                if ("0".equals(key)) return;
+                enteredAmount.setLength(0);
+            }
+            if (enteredAmount.length() < 6) {
+                enteredAmount.append(key);
+                updateAmountField();
+            }
         }
     }
 

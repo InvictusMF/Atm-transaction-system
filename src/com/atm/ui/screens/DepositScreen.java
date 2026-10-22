@@ -12,7 +12,7 @@ import java.awt.*;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class DepositScreen extends JPanel implements ScreenManager.RefreshableScreen {
+public class DepositScreen extends JPanel implements ScreenManager.KeypadListener, ScreenManager.RefreshableScreen {
     private enum ScreenState {
         HOPPER,
         CONFIRMATION,
@@ -540,6 +540,24 @@ public class DepositScreen extends JPanel implements ScreenManager.RefreshableSc
         List<Transaction> txs = screenManager.getAtmService().getMiniStatement(session, 1);
         if (!txs.isEmpty()) {
             new ReceiptPopup(screenManager.getFrame(), session, txs.get(0), "ATM Receipt - Cash Deposit").setVisible(true);
+        }
+    }
+
+    @Override public void onKeyPressed(String key) {}
+    @Override public void onClear() { resetSpinners(); }
+    @Override public void onCancel() {
+        if (currentState == ScreenState.CONFIRMATION) {
+            setStep(ScreenState.HOPPER);
+        } else {
+            resetSpinners();
+            screenManager.showScreen("MAIN_MENU");
+        }
+    }
+    @Override public void onEnter() {
+        if (currentState == ScreenState.HOPPER) {
+            proceedToConfirmation();
+        } else if (currentState == ScreenState.CONFIRMATION) {
+            executeDeposit();
         }
     }
 

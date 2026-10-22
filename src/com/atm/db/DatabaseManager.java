@@ -172,7 +172,7 @@ public class DatabaseManager {
 
         if (from == null || to == null) return false;
         if (!"ACTIVE".equalsIgnoreCase(from.getStatus()) || !"ACTIVE".equalsIgnoreCase(to.getStatus())) return false;
-        if (amount.compareTo(BigDecimal.ZERO) <= 0 || from.getBalance().compareTo(amount) < 0) return false;
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0 || from.getBalance().compareTo(amount) < 0) return false;
 
         // Debit sender
         from.debit(amount);

@@ -25,6 +25,7 @@ public class MiniStatementScreen extends JPanel implements ScreenManager.Refresh
     private JLabel inflowLabel;
     private JLabel outflowLabel;
     private List<Transaction> allAccountTransactions = new ArrayList<>();
+    private List<Transaction> displayedTransactions = new ArrayList<>();
     private String currentFilter = "ALL";
 
     public MiniStatementScreen(ScreenManager screenManager) {
@@ -210,6 +211,8 @@ public class MiniStatementScreen extends JPanel implements ScreenManager.Refresh
             return true;
         }).collect(Collectors.toList());
 
+        this.displayedTransactions = filtered;
+
         for (Transaction t : filtered) {
             String amtPrefix = "";
             if ("DEPOSIT".equals(t.getTransactionType()) || "TRANSFER_IN".equals(t.getTransactionType())) {
@@ -241,13 +244,15 @@ public class MiniStatementScreen extends JPanel implements ScreenManager.Refresh
         AtmSession session = screenManager.getSession();
         if (session == null) return;
 
-        if (allAccountTransactions.isEmpty()) {
+        if (displayedTransactions.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No transaction records found to print.", "NO TRANSACTIONS", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
         int selectedRow = txTable.getSelectedRow();
-        Transaction targetTx = (selectedRow >= 0 && selectedRow < allAccountTransactions.size()) ? allAccountTransactions.get(selectedRow) : allAccountTransactions.get(0);
+        Transaction targetTx = (selectedRow >= 0 && selectedRow < displayedTransactions.size())
+                ? displayedTransactions.get(selectedRow)
+                : displayedTransactions.get(0);
         new ReceiptPopup(screenManager.getFrame(), session, targetTx, "ATM Thermal Receipt").setVisible(true);
     }
 

@@ -151,9 +151,9 @@ public class MainMenuScreen extends JPanel implements ScreenManager.KeypadListen
             case "1": screenManager.showScreen("FAST_CASH"); break;
             case "2": screenManager.showScreen("WITHDRAW"); break;
             case "3": screenManager.showScreen("DEPOSIT"); break;
-            case "4": screenManager.showScreen("BALANCE"); break;
-            case "5": screenManager.showScreen("MINI_STATEMENT"); break;
-            case "6": screenManager.showScreen("TRANSFER"); break;
+            case "4": screenManager.showScreen("TRANSFER"); break;
+            case "5": screenManager.showScreen("BALANCE"); break;
+            case "6": screenManager.showScreen("MINI_STATEMENT"); break;
             case "7": screenManager.showScreen("PIN_CHANGE"); break;
             case "8": exitSession(); break;
         }

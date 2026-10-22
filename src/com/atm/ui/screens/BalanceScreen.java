@@ -11,7 +11,7 @@ import java.awt.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class BalanceScreen extends JPanel implements ScreenManager.RefreshableScreen {
+public class BalanceScreen extends JPanel implements ScreenManager.KeypadListener, ScreenManager.RefreshableScreen {
     private final ScreenManager screenManager;
 
     private JLabel nameLabel;
@@ -167,6 +167,11 @@ public class BalanceScreen extends JPanel implements ScreenManager.RefreshableSc
 
         new ReceiptPopup(screenManager.getFrame(), session, inquiryTx, "Official Balance Slip").setVisible(true);
     }
+
+    @Override public void onKeyPressed(String key) {}
+    @Override public void onClear() {}
+    @Override public void onCancel() { screenManager.showScreen("MAIN_MENU"); }
+    @Override public void onEnter() { printBalanceReceipt(); }
 
     @Override
     public void refreshScreen() {
